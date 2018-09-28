@@ -1,6 +1,9 @@
 function setup() {
 	// Setup the Canvas based on the window dimensions
 	createCanvas(windowWidth, windowHeight);
+	fr = 30; // Frames per second 
+	frameRate(fr); 
+	getAudioContext().resume(); // Overrides sound setting
 	
 	// Initialize mic device 
 	mic = new p5.AudioIn();
@@ -15,13 +18,14 @@ function setup() {
 	recPressed = 0; // Whether the rec button was pushed
 	playState = 0;
 	playPressed = 0; // Whether the play button was pushed
-	
+	recTime = 0; // Counter for recording time
+	recTimeMax = 10 * fr; // Recording Time Limit (10 * fr = 10s)
 }
 
 function draw() {
 	
 	//////+ BUTTONS +//////
-		// STUB: need counter to stop recording after set time
+		// STUB: need to display recording time
 		// STUB: needs visible buttons to trigger Pressed flags
 		// STUB: when implementing sequencer playback, need to be careful
 			//	to avoid interference
@@ -36,23 +40,32 @@ function draw() {
 		recState++; // standby for stop
 		recPressed = 0; // Clear press
 		
-	// Stop recording
-	} else if (recState === 1 && recPressed) {
-		rec.stop();
-		recState = 0; // Return to standby
-		recPressed = 0; // Clear press
+	// Recording State
+	} else if (recState === 1) {
+		recTime++
+		
+		// Stop recording? (button pressed or time up)
+		if (recPressed || recTime >= recTimeMax) {
+			rec.stop();
+			recState = 0; // Return to standby
+			recPressed = 0; // Clear press
+			recTime = 0; // Clear recording time counter
+		}
 	}
 	
 	////// "Play Sample" Button //////
 	
 	// Start Playback of Sample
 	if (playState === 0 && recState === 0 && playPressed) {
+		// Stop the sound first if playing
+		if (recSound.isPlaying()) {recSound.stop();}
+		// Play 
 		recSound.play();
 		playState++;
 		playPressed = 0;
 	// Stop Playback of Sample
 	} else if (playState === 1 && playPressed) {
-		recSound.stop();
+		if (recSound.isPlaying()) {recSound.stop();}
 		playState = 0;
 		playPressed = 0;
 	}
