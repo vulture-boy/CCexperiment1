@@ -93,10 +93,13 @@ function draw() {
 		// BPM to Counter Value conversion (& display)
 		// 
 		
-	// GUI (last job)
+	// GUI 
 		// Mockup of layout (photoshop/illustrator/etc)
 		// Graphical Overhaul & Elements
 		// Adaptive positions / sizing
+		
+	// Sound Visualization (FEATURE)
+	// Tilting Control (FEATURE)
 		
 }
 
