@@ -1,9 +1,31 @@
+function preload() {
+	// Preload graphical assets
+	img_board_on = loadImage('images/buttons/board/board_in.png');
+	img_board_off = loadImage('images/buttons/board/board_out.png');
+	img_board_on_act = loadImage('images/buttons/board/board_inA.png');
+	img_board_off_act = loadImage('images/buttons/board/board_outA.png');
+	img_mic_on = loadImage('images/buttons/mic/mic_on.png');
+	img_mic_off = loadImage('images/buttons/mic/mic_off.png');
+	img_mic_press = loadImage('images/buttons/mic/mic_press.png');
+	img_play_board_on = loadImage('images/buttons/play/play_on.png');
+	img_play_board_off = loadImage('images/buttons/play/play_off.png');
+	img_play_board_press = loadImage('images/buttons/play/play_press.png');
+	img_play_sample_on = loadImage('images/buttons/play/playS_on.png');
+	img_play_sample_off = loadImage('images/buttons/play/playS_off.png');
+	img_play_sample_press = loadImage('images/buttons/play/playS_press.png');
+	
+}
+
 function setup() {
 	// Setup the Canvas based on the window dimensions
-	createCanvas(windowWidth, windowHeight);
+	var canv = createCanvas(windowWidth, windowHeight);
+	canv.position(0,0);
 	fr = 30; // Frames per second 
 	frameRate(fr); 
 	getAudioContext().resume(); // Overrides sound setting
+	
+	// Indicates display mode
+	displayMode = 0; // 0 - Board || 1 - Graphics
 	
 	// Initialize mic device 
 	mic = new p5.AudioIn();
@@ -14,15 +36,65 @@ function setup() {
 	// Destination for recorded material
 	recSound = new p5.SoundFile();
 	// State Machine: status of recording / play button
-	recState = 0; 
-	recPressed = 0; // Whether the rec button was pushed
+
 	playState = 0;
 	playPressed = 0; // Whether the play button was pushed
 	recTime = 0; // Counter for recording time
 	recTimeMax = 10 * fr; // Recording Time Limit (10 * fr = 10s)
+	
+	// Used when determining drawing perspective
+	windowDims();
+	
+	// Button objects
+	micButton = new MicButton();
+}
+
+// Button Object (for Microphone)
+function MicButton(xOrigin,yOrigin,width,height) {
+	this.x = xOrigin;
+	this.y = yOrigin;
+	this.width = width;
+	this.height = height;
+	this.buttonState = 0;
+	this.buttonPressed = 0;
+	this.recImage = img_mic_off;
+	
+	// Updates button image
+	this.update = function() {
+		if (this.buttonPressed == 0) {
+			if (this.buttonState == 0) {
+				this.recImage = img_mic_off;
+			} else if (this.buttonState == 1) {
+				this.recImage = img_mic_on;
+			}
+		} else {
+			this.recImage = img_mic_press;
+		}
+	}
+	
+	// Displays button
+	this.display = function() {
+		this.update();
+		image(this.recImage,this.x,this.y,this.height,this.width);
+	}
+	
 }
 
 function draw() {
+	
+	//////+ GRAPHICS +//////
+		// STUB: Probably will need to make modes high-level brackets.
+	
+	// Sample Board Mode
+	if (displayMode == 0) {
+		background(245);
+		// Display Buttons
+		micButton.display();
+	
+	// Audiovisual Mode
+	} else {
+		
+	}
 	
 	//////+ BUTTONS +//////
 		// STUB: need to display recording time
@@ -34,21 +106,21 @@ function draw() {
 	////// Recording Button //////
 	
 	// Enable Recording
-	if (recState === 0 && mic.enabled && recPressed) {
+	if (micButton.buttonState === 0 && mic.enabled && micButton.buttonPressed) {
 		// Recording
 		rec.record(recSound);
-		recState++; // standby for stop
-		recPressed = 0; // Clear press
+		micButton.buttonState++; // standby for stop
+		micButton.buttonPressed = 0; // Clear press
 		
 	// Recording State
-	} else if (recState === 1) {
+	} else if (micButton.buttonState === 1) {
 		recTime++
 		
 		// Stop recording? (button pressed or time up)
-		if (recPressed || recTime >= recTimeMax) {
+		if (micButton.buttonPressed || recTime >= recTimeMax) {
 			rec.stop();
-			recState = 0; // Return to standby
-			recPressed = 0; // Clear press
+			micButton.buttonState = 0; // Return to standby
+			micButton.buttonPressed = 0; // Clear press
 			recTime = 0; // Clear recording time counter
 		}
 	}
@@ -56,7 +128,7 @@ function draw() {
 	////// "Play Sample" Button //////
 	
 	// Start Playback of Sample
-	if (playState === 0 && recState === 0 && playPressed) {
+	if (playState === 0 && micButton.buttonState === 0 && playPressed) {
 		// Stop the sound first if playing
 		if (recSound.isPlaying()) {recSound.stop();}
 		// Play 
@@ -104,6 +176,13 @@ function draw() {
 }
 
 function windowResized() {
-	canvasWidth = windowWidth;
-	canvasHeight = windowHeight;
+	resizeCanvas(windowWidth,windowHeight);
+	windowDims();
 }
+
+function windowDims() {
+	windowMax = max(windowWidth,windowHeight);
+	windowMin = min(windowWidth,windowHeight);
+	windowOrient = windowWidth > windowHeight;
+}
+
