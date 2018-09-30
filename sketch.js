@@ -1,5 +1,12 @@
-function preload() {
-	// Preload graphical assets
+/* OctoSwish Plus - A graphical audio sampler
+Sample Board by Tyson Moll
+Audiovisualization by Amreen
+
+for Creation and Computation class, Fall 2018
+Digital Futures Graduate Program
+*/
+
+function preload() { // Preload graphical assets
 	img_board_on = loadImage('/images/button_gfx/board/board_in.png');
 	img_board_off = loadImage('/images/button_gfx/board/board_out.png');
 	img_board_press = loadImage('/images/button_gfx/board/board_out.png');
@@ -18,7 +25,10 @@ function preload() {
 	
 }
 
-function setup() {
+function setup() { // Initialization of Canvas Properties
+
+	////// Canvas //////
+
 	// Setup the Canvas based on the window dimensions
 	var canv = createCanvas(windowWidth, windowHeight);
 	canv.position(0,0);
@@ -29,6 +39,11 @@ function setup() {
 	// Indicates display mode
 	displayMode = 0; // 0 - Board || 1 - Graphics
 	
+	// Used when determining drawing perspective
+	windowDims();
+	
+	////// Sound //////
+	
 	// Initialize mic device 
 	mic = new p5.AudioIn();
 	mic.start(); // prompts user to enable browser mic
@@ -37,27 +52,37 @@ function setup() {
 	rec.setInput(mic);
 	// Destination for recorded material
 	recSound = new p5.SoundFile();
-	// State Machine: status of recording / play button
-
-	playState = 0;
-	playPressed = 0; // Whether the play button was pushed
+	
+	// Recording Time
 	recTime = 0; // Counter for recording time
 	recTimeMax = 5 * fr; // Recording Time Limit (10 * fr = 10s)
 	
-	// Used when determining drawing perspective
-	windowDims();
+	////// Initialize Button objects //////
+	regButtons = [];
 	
-	// Button objects
+	// Mic Button
 	micX = 0.1;
 	micY = 0.1;
 	micSize = 0.1;
-	micButton = new MicButton(0,0,0);
-	micButton.x = micX * windowMax;
-	micButton.y = micY * windowMin;
-	micButton.proport = micSize * windowMax
-	micButton.recImage = img_mic_off;
+	micButton = new Button(0,0,0,0,0);
+	micButton.myImage = img_mic_off;
+	micButton.mode = 0;
+	regButtons.push(micButton);
 	
 	// Play Buttons
+	playSX = 0.2;
+	playSY = 0.1;
+	playX = playSX;
+	playY = playSY + 0.1;
+	playSize = 0.04;
+	playSButton = new Button(0,0,0,0,0); // Play Sample
+	playSButton.myImage = img_play_sample_off;
+	playSButton.mode = 1;
+	regButtons.push(playSButton);
+	playButton = new Button(0,0,0,0,0); // Play Board
+	playButton.myImage = img_play_board_off;
+	playButton.mode = 2;
+	regButtons.push(playButton);
 	
 	// Sample Board Buttons
 	sampleButtons = [];
@@ -71,7 +96,9 @@ function setup() {
 	for (var i=0; i<sampleNum; i++) {
 		var xPos = (i % sampleCols);
 		var yPos = i - xPos;
-		var aButton = new SampButton(0,0, xPos, yPos, sampleSize);
+		var aButton = new Button(0,0,sampleSize, xPos, yPos);
+		aButton.myImage = img_board_off;
+		aButton.mode = 3;
 		sampleButtons.push(aButton);
 	}
 	
@@ -80,58 +107,70 @@ function setup() {
 	
 }
 
-// Button Object (for Sample Board)
-function SampButton(xOrigin, yOrigin, xPos, yPos, proport) {
-	this.xRel = xPos; // Relative position in Array
-	this.yRel = yPos;
-	this.x = xOrigin; // Position of this button
-	this.y = yOrigin;
-	this.proport = proport; // Scale Size
-	this.buttonState = 0;
-	this.buttonPressed = 0;
-	this.sampImage = img_board_off;
-	
-	this.update = function() {
-		if (this.buttonPressed == 0) {
-			if (this.buttonState == 0) {
-				this.sampImage = img_board_off;
-			} else if (this.buttonState == 1) {
-				this.sampImage = img_board_on;
-			}
-		} else {
-			this.sampImage = img_board_press;
-		}
-	}
-	
-	this.clicked = function() {
-		
-	}
-	
-	this.display = function() {
-		this.update();
-		image(this.sampImage,this.x,this.y,this.proport,this.proport);
-	}
-}
-
-// Button Object (for Microphone)
-function MicButton(xOrigin,yOrigin,proport) {
+function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 	this.x = xOrigin; // Top Left of Button
 	this.y = yOrigin;
+	this.xRel = xPos; // Relative position in Array
+	this.yRel = yPos;
 	this.proport = proport; // Scale Size
 	this.buttonState = 0;
 	this.buttonPressed = 0;
-	this.recImage = img_mic_off;
+	this.myImage = img_board_off;
+	this.mode = 0; // Type of Button
 	
 	// Updates button image
 	this.update = function() {
-		if (this.buttonPressed == 0) {
-			if (this.buttonState == 0) {
-				this.recImage = img_mic_off;
-			} else if (this.buttonState == 1) {
-				this.recImage = img_mic_on;
-			}
-		} else {
-			this.recImage = img_mic_press;
+		switch (this.mode) {
+			case 0: // Mic
+				if (this.buttonPressed == 0) {
+					if (this.buttonState == 0) {
+						this.myImage = img_mic_off;
+					} else if (this.buttonState == 1) {
+						this.myImage = img_mic_on;
+					}
+				} else {
+					this.myImage = img_mic_press;
+				}
+			break;
+			
+			case 1: // Sample Playback
+				if (this.buttonPressed == 0) {
+					if (this.buttonState == 0) {
+						this.myImage = img_play_sample_off;
+					} else if (this.buttonState == 1) {
+						this.myImage = img_play_sample_on;
+					}
+				} else {
+					this.myImage = img_play_sample_press;
+				}
+			break;
+			
+			case 2: // Board Playback 
+				if (this.buttonPressed == 0) {
+					if (this.buttonState == 0) {
+						this.myImage = img_play_board_off;
+					} else if (this.buttonState == 1) {
+						this.myImage = img_play_board_on;
+					}
+				} else {
+					this.myImage = img_play_board_press;
+				}
+			break;
+			
+			case 3: // Board Button
+				if (this.buttonPressed == 0) {
+					if (this.buttonState == 0) {
+						this.myImage = img_board_off;
+					} else if (this.buttonState == 1) {
+						this.myImage = img_board_on;
+					}
+				} else {
+					this.myImage = img_board_press;
+				}
+			break;
+			
+			default:
+			break;
 		}
 	}
 	
@@ -142,12 +181,12 @@ function MicButton(xOrigin,yOrigin,proport) {
 	// Displays button
 	this.display = function() {
 		this.update();
-		image(this.recImage,this.x,this.y,this.proport,this.proport);
+		image(this.myImage,this.x,this.y,this.proport,this.proport);
 	}
 	
 }
 
-function draw() {
+function draw() { // Occurs each frame
 	
 	//////+ GRAPHICS +//////
 		// STUB: Probably will need to make modes high-level brackets.
@@ -156,7 +195,9 @@ function draw() {
 	if (displayMode == 0) {
 		background(25);
 		// Display Buttons
-		micButton.display();
+		for (var i=0; i<regButtons.length;i++) {
+			regButtons[i].display();
+		}
 		for (var i=0; i<sampleNum; i++) {
 			sampleButtons[i].display();
 		}
@@ -198,22 +239,22 @@ function draw() {
 	////// "Play Sample" Button //////
 	
 	// Start Playback of Sample
-	if (playState === 0 && micButton.buttonState === 0 && playPressed) {
+	if (playButton.buttonState === 0 && micButton.buttonState === 0 && playButton.buttonPressed) {
 		// Stop the sound first if playing
 		if (recSound.isPlaying()) {recSound.stop();}
 		// Play 
 		recSound.play();
-		playState++;
-		playPressed = 0;
+		playButton.buttonState++;
+		playButton.buttonPressed = 0;
 	// Stop Playback of Sample
-	} else if (playState === 1 && playPressed) {
+	} else if (playButton.buttonState === 1 && playButton.buttonPressed) {
 		if (recSound.isPlaying()) {recSound.stop();}
-		playState = 0;
-		playPressed = 0;
+		playButton.buttonState = 0;
+		playButton.buttonPressed = 0;
 	}
-	// Reset playState when sound is finished playing
-	if (recSound.isPlaying() == false && playState === 1) {
-		playState = 0;
+	// Reset playButton.buttonState when sound is finished playing
+	if (recSound.isPlaying() == false && playButton.buttonState === 1) {
+		playButton.buttonState = 0;
 	}
 	
 	// Sliders
@@ -245,16 +286,18 @@ function draw() {
 		
 }
 
-function mousePressed() {
+function mousePressed() { // Triggered when mouse button is pressed
 	
 	// Check for Button Presses
 	
 	// Mic Button
 	// STUB: Probably should make the mic icon colour stay consistent
-	var xCheck = (micButton.x < mouseX) && (micButton.x + micButton.proport > mouseX);
-	var yCheck = (micButton.y < mouseY) && (micButton.y + micButton.proport > mouseY);
-	if (xCheck && yCheck) {
-		micButton.buttonPressed = 1;
+	for (var i=0;i<regButtons.length;i++) {
+		var xCheck = (regButtons[i].x < mouseX) && (regButtons[i].x + regButtons[i].proport > mouseX);
+		var yCheck = (regButtons[i].y < mouseY) && (regButtons[i].y + regButtons[i].proport > mouseY);
+		if (xCheck && yCheck) {
+			regButtons[i].buttonPressed = 1;
+		}
 	}
 	
 	// Sample Board Buttons
@@ -269,24 +312,31 @@ function mousePressed() {
 	
 }
 
-function windowResized() {
+function windowResized() { // Triggered when window is resized
 	resizeCanvas(windowWidth,windowHeight);
 	windowDims();
 	calibrateButtons();
 }
 
-function windowDims() {
+function windowDims() { // Gets Window Dimension Properties 
 	windowMax = max(windowWidth,windowHeight);
 	windowMin = min(windowWidth,windowHeight);
 	windowOrient = (windowWidth > windowHeight);
 }
 
-// Refreshes Button Size & Position
-function calibrateButtons() {
+function calibrateButtons() { // Refreshes Button Size & Position
 	// Mic Button
 	micButton.x = micX * windowMax;
 	micButton.y = micY * windowMin;
 	micButton.proport = micSize * windowMax;
+	
+	playButton.x = playX * windowMax;
+	playButton.y = playY * windowMin;
+	playButton.proport = playSize * windowMax;
+	
+	playSButton.x = playSX * windowMax;
+	playSButton.y = playSY * windowMin;
+	playSButton.proport = playSize * windowMax;
 	
 	// Sampler Buttons
 	for (var i=0; i<sampleNum; i++) {
