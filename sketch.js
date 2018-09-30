@@ -46,15 +46,21 @@ function setup() {
 	windowDims();
 	
 	// Button objects
-	micButton = new MicButton();
+	micX = 0.1;
+	micY = 0.1;
+	micSize = 0.1;
+	micButton = new MicButton(0,0,0);
+	micButton.x = micX * windowMax;
+	micButton.y = micY * windowMin;
+	micButton.proport = micSize * windowMax
+	micButton.recImage = img_mic_off;
 }
 
 // Button Object (for Microphone)
-function MicButton(xOrigin,yOrigin,width,height) {
+function MicButton(xOrigin,yOrigin,proport) {
 	this.x = xOrigin;
 	this.y = yOrigin;
-	this.width = width;
-	this.height = height;
+	this.proport = proport;
 	this.buttonState = 0;
 	this.buttonPressed = 0;
 	this.recImage = img_mic_off;
@@ -72,10 +78,14 @@ function MicButton(xOrigin,yOrigin,width,height) {
 		}
 	}
 	
+	this.clicked = function() {
+		buttonPressed = 1;
+	}
+	
 	// Displays button
 	this.display = function() {
 		this.update();
-		image(this.recImage,this.x,this.y,this.height,this.width);
+		image(this.recImage,this.x,this.y,this.proport,this.proport);
 	}
 	
 }
@@ -87,7 +97,7 @@ function draw() {
 	
 	// Sample Board Mode
 	if (displayMode == 0) {
-		background(245);
+		background(25);
 		// Display Buttons
 		micButton.display();
 	
@@ -178,11 +188,20 @@ function draw() {
 function windowResized() {
 	resizeCanvas(windowWidth,windowHeight);
 	windowDims();
+	calibrateButtons();
+	print(micButton.proport);
 }
 
 function windowDims() {
 	windowMax = max(windowWidth,windowHeight);
 	windowMin = min(windowWidth,windowHeight);
-	windowOrient = windowWidth > windowHeight;
+	windowOrient = (windowWidth > windowHeight);
+}
+
+// Refreshes Button Size & Position
+function calibrateButtons() {
+	micButton.x = micX * windowMax;
+	micButton.y = micY * windowMin;
+	micButton.proport = micSize * windowMax;
 }
 
