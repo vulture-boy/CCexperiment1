@@ -4,6 +4,40 @@ Audiovisualization by Amreen
 
 for Creation and Computation class, Fall 2018
 Digital Futures Graduate Program
+
+KNOWN ISSUES:
+- Playback buttons are probably backwards / not matching use
+- Proportional scaling has some issues... 
+- There's backend functionality for portrait mode, but not used yet
+- Playback needs a check to ensure something has been recorded
+- Board Buttons need to be redone such that the highlight is seperate
+- Board Buttons need a press state
+
+NOT YET IMPLEMENTED:
+- Recording
+	// Time Display
+	
+- Playback (sample)
+- Playback (board)
+	// Play Matrix Button
+	// Counter to move through playing items in array (playback cursor)
+	// BPM to Counter Value conversion (& display)
+- Sound Manipulation sliders
+	// Volume
+	// Delay
+	// Filter
+	// Reverb
+	// EQ?
+	// Fade? 
+	// Cozy with GUI
+	// (confirm non-destructive)
+	// "Tilt Whammy" + buttons
+- Proper Proportional Scaling
+- Audiovisual 
+	// Button to toggle mode
+	// Display Mode functionality (to confirm when complete)
+	// (Amreen to do the audiovisual display)
+
 */
 
 function preload() { // Preload graphical assets
@@ -189,7 +223,6 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 function draw() { // Occurs each frame
 	
 	//////+ GRAPHICS +//////
-		// STUB: Probably will need to make modes high-level brackets.
 	
 	// Sample Board Mode
 	if (displayMode == 0) {
@@ -204,15 +237,13 @@ function draw() { // Occurs each frame
 	
 	// Audiovisual Mode
 	} else {
-		
+		// STUB
 	}
 	
 	//////+ BUTTONS +//////
 		// STUB: need to display recording time
-		// STUB: needs visible buttons to trigger Pressed flags
 		// STUB: when implementing sequencer playback, need to be careful
 			//	to avoid interference
-		// STUB: Graphical Representations.
 	
 	////// Recording Button //////
 	
@@ -255,35 +286,7 @@ function draw() { // Occurs each frame
 	// Reset playButton.buttonState when sound is finished playing
 	if (recSound.isPlaying() == false && playButton.buttonState === 1) {
 		playButton.buttonState = 0;
-	}
-	
-	// Sliders
-		// Volume
-		// Delay
-		// Filter
-		// Reverb
-		// EQ?
-		// Fade? 
-		// Graphical Representation
-		// BPM
-		// Associated manipulation of sound (non-destructive)
-		
-	// Sample Matrix
-		// Play Matrix Button
-		// Array of sequence buttons
-		// Array for representation
-		// Counter to move through playing items in array
-		// BPM to Counter Value conversion (& display)
-		// 
-		
-	// GUI 
-		// Mockup of layout (photoshop/illustrator/etc)
-		// Graphical Overhaul & Elements
-		// Adaptive positions / sizing
-		
-	// Sound Visualization (FEATURE)
-	// Tilting Control (FEATURE)
-		
+	}		
 }
 
 function mousePressed() { // Triggered when mouse button is pressed
@@ -325,16 +328,14 @@ function windowDims() { // Gets Window Dimension Properties
 }
 
 function calibrateButtons() { // Refreshes Button Size & Position
-	// Mic Button
-	micButton.x = micX * windowMax;
+	// Standard Button Proportions
+	micButton.x = micX * windowMax; // Mic Button
 	micButton.y = micY * windowMin;
 	micButton.proport = micSize * windowMax;
-	
-	playButton.x = playX * windowMax;
+	playButton.x = playX * windowMax; // Play Button
 	playButton.y = playY * windowMin;
 	playButton.proport = playSize * windowMax;
-	
-	playSButton.x = playSX * windowMax;
+	playSButton.x = playSX * windowMax; // Play Sample Button
 	playSButton.y = playSY * windowMin;
 	playSButton.proport = playSize * windowMax;
 	
