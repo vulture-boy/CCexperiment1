@@ -1,18 +1,18 @@
 function preload() {
 	// Preload graphical assets
-	img_board_on = loadImage('/images/buttons/board/board_in.png');
-	img_board_off = loadImage('/images/buttons/board/board_out.png');
-	img_board_on_act = loadImage('/images/buttons/board/board_inA.png');
-	img_board_off_act = loadImage('/images/buttons/board/board_outA.png');
-	img_mic_on = loadImage('/images/buttons/mic/mic_on.png');
-	img_mic_off = loadImage('/images/buttons/mic/mic_off.png');
-	img_mic_press = loadImage('/images/buttons/mic/mic_press.png');
-	img_play_board_on = loadImage('/images/buttons/play/play_on.png');
-	img_play_board_off = loadImage('/images/buttons/play/play_off.png');
-	img_play_board_press = loadImage('/images/buttons/play/play_press.png');
-	img_play_sample_on = loadImage('/images/buttons/play/playS_on.png');
-	img_play_sample_off = loadImage('/images/buttons/play/playS_off.png');
-	img_play_sample_press = loadImage('/images/buttons/play/playS_press.png');
+	img_board_on = loadImage('/images/button_gfx/board/board_in.png');
+	img_board_off = loadImage('/images/button_gfx/board/board_out.png');
+	img_board_on_act = loadImage('/images/button_gfx/board/board_inA.png');
+	img_board_off_act = loadImage('/images/button_gfx/board/board_outA.png');
+	img_mic_on = loadImage('/images/button_gfx/mic/mic_on.png');
+	img_mic_off = loadImage('/images/button_gfx/mic/mic_off.png');
+	img_mic_press = loadImage('/images/button_gfx/mic/mic_press.png');
+	img_play_board_on = loadImage('/images/button_gfx/play/play_on.png');
+	img_play_board_off = loadImage('/images/button_gfx/play/play_off.png');
+	img_play_board_press = loadImage('/images/button_gfx/play/play_press.png');
+	img_play_sample_on = loadImage('/images/button_gfx/play/playS_on.png');
+	img_play_sample_off = loadImage('/images/button_gfx/play/playS_off.png');
+	img_play_sample_press = loadImage('/images/button_gfx/play/playS_press.png');
 	
 }
 
