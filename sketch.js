@@ -54,13 +54,59 @@ function setup() {
 	micButton.y = micY * windowMin;
 	micButton.proport = micSize * windowMax
 	micButton.recImage = img_mic_off;
+	
+	// Play Buttons
+	
+	// Sample Board Buttons
+	sampleButtons = [];
+	// Create many buttons
+	sampleX = 0.1; // Top Left of Sample Board
+	sampleY = 0.4;
+	sampleSize = 0.1; // Scaling Size
+	sampleOffsetX = 0.1; // Spacing between buttons
+	sampleOffsetY = 0.01;
+	sampleNum = 8*4; // No. of sample buttons
+	sampleCols = 8; // No. columns of buttons
+	for (var i=0; i<sampleNum; i++) {
+		var xPos = (i % sampleCols);
+		var yPos = i - xPos;
+		var aButton = new SampButton(0,0, xPos, yPos, sampleSize);
+		sampleButtons.push(aButton);
+	}
+	
+	// Setup relative button positions
+	calibrateButtons()
+	
+}
+
+// Button Object (for Sample Board)
+function SampButton(xOrigin, yOrigin, xPos, yPos, proport) {
+	this.xRel = xPos; // Relative position in Array
+	this.yRel = yPos;
+	this.x = xOrigin; // Position of this button
+	this.y = yOrigin;
+	this.proport = proport; // Scale Size
+	this.sampImage = img_board_off;
+	
+	this.update = function() {
+		
+	}
+	
+	this.clicked = function() {
+		
+	}
+	
+	this.display = function() {
+		this.update();
+		image(this.sampImage,this.x,this.y,this.proport,this.proport);
+	}
 }
 
 // Button Object (for Microphone)
 function MicButton(xOrigin,yOrigin,proport) {
-	this.x = xOrigin;
+	this.x = xOrigin; // Top Left of Button
 	this.y = yOrigin;
-	this.proport = proport;
+	this.proport = proport; // Scale Size
 	this.buttonState = 0;
 	this.buttonPressed = 0;
 	this.recImage = img_mic_off;
@@ -100,6 +146,9 @@ function draw() {
 		background(25);
 		// Display Buttons
 		micButton.display();
+		for (var i=0; i<sampleNum; i++) {
+			sampleButtons[i].display();
+		}
 	
 	// Audiovisual Mode
 	} else {
@@ -189,7 +238,6 @@ function windowResized() {
 	resizeCanvas(windowWidth,windowHeight);
 	windowDims();
 	calibrateButtons();
-	print(micButton.proport);
 }
 
 function windowDims() {
@@ -200,8 +248,16 @@ function windowDims() {
 
 // Refreshes Button Size & Position
 function calibrateButtons() {
+	// Mic Button
 	micButton.x = micX * windowMax;
 	micButton.y = micY * windowMin;
 	micButton.proport = micSize * windowMax;
+	
+	// Sampler Buttons
+	for (var i=0; i<sampleNum; i++) {
+		sampleButtons[i].x = sampleX * windowMax + sampleButtons[i].xRel * sampleOffsetX * windowMax;
+		sampleButtons[i].y = sampleY * windowMin + sampleButtons[i].yRel * sampleOffsetY * windowMin;
+		sampleButtons[i].proport = sampleSize * windowMax
+	}
 }
 
