@@ -2,8 +2,10 @@ function preload() {
 	// Preload graphical assets
 	img_board_on = loadImage('/images/button_gfx/board/board_in.png');
 	img_board_off = loadImage('/images/button_gfx/board/board_out.png');
+	img_board_press = loadImage('/images/button_gfx/board/board_out.png');
 	img_board_on_act = loadImage('/images/button_gfx/board/board_inA.png');
 	img_board_off_act = loadImage('/images/button_gfx/board/board_outA.png');
+	img_board_press_act = loadImage('/images/button_gfx/board/board_outA.png');
 	img_mic_on = loadImage('/images/button_gfx/mic/mic_on.png');
 	img_mic_off = loadImage('/images/button_gfx/mic/mic_off.png');
 	img_mic_press = loadImage('/images/button_gfx/mic/mic_press.png');
@@ -40,7 +42,7 @@ function setup() {
 	playState = 0;
 	playPressed = 0; // Whether the play button was pushed
 	recTime = 0; // Counter for recording time
-	recTimeMax = 10 * fr; // Recording Time Limit (10 * fr = 10s)
+	recTimeMax = 5 * fr; // Recording Time Limit (10 * fr = 10s)
 	
 	// Used when determining drawing perspective
 	windowDims();
@@ -59,14 +61,13 @@ function setup() {
 	
 	// Sample Board Buttons
 	sampleButtons = [];
-	// Create many buttons
-	sampleX = 0.1; // Top Left of Sample Board
-	sampleY = 0.4;
+	sampleX = 0.07; // Top Left of Sample Board
+	sampleY = 0.3;
 	sampleSize = 0.1; // Scaling Size
-	sampleOffsetX = 0.1; // Spacing between buttons
-	sampleOffsetY = 0.01;
-	sampleNum = 8*4; // No. of sample buttons
+	sampleOffsetX = 0.08; // Spacing between buttons
+	sampleOffsetY = 0.012;
 	sampleCols = 8; // No. columns of buttons
+	sampleNum = sampleCols*4; // No. of sample buttons
 	for (var i=0; i<sampleNum; i++) {
 		var xPos = (i % sampleCols);
 		var yPos = i - xPos;
@@ -86,10 +87,20 @@ function SampButton(xOrigin, yOrigin, xPos, yPos, proport) {
 	this.x = xOrigin; // Position of this button
 	this.y = yOrigin;
 	this.proport = proport; // Scale Size
+	this.buttonState = 0;
+	this.buttonPressed = 0;
 	this.sampImage = img_board_off;
 	
 	this.update = function() {
-		
+		if (this.buttonPressed == 0) {
+			if (this.buttonState == 0) {
+				this.sampImage = img_board_off;
+			} else if (this.buttonState == 1) {
+				this.sampImage = img_board_on;
+			}
+		} else {
+			this.sampImage = img_board_press;
+		}
 	}
 	
 	this.clicked = function() {
@@ -232,6 +243,30 @@ function draw() {
 	// Sound Visualization (FEATURE)
 	// Tilting Control (FEATURE)
 		
+}
+
+function mousePressed() {
+	
+	// Check for Button Presses
+	
+	// Mic Button
+	// STUB: Probably should make the mic icon colour stay consistent
+	var xCheck = (micButton.x < mouseX) && (micButton.x + micButton.proport > mouseX);
+	var yCheck = (micButton.y < mouseY) && (micButton.y + micButton.proport > mouseY);
+	if (xCheck && yCheck) {
+		micButton.buttonPressed = 1;
+	}
+	
+	// Sample Board Buttons
+	// STUB: Need to redo button graphics; glow should be seperate image
+	for (var i=0;i<sampleNum;i++) {
+		var xCheck = (sampleButtons[i].x < mouseX) && (sampleButtons[i].x + sampleButtons[i].proport > mouseX);
+		var yCheck = (sampleButtons[i].y < mouseY) && (sampleButtons[i].y + sampleButtons[i].proport > mouseY);
+		if (xCheck && yCheck) {
+			sampleButtons[i].buttonPressed = 1;
+		}
+	}
+	
 }
 
 function windowResized() {
