@@ -1,7 +1,7 @@
 
 function preload() {
     soundFormats('mp3');
-    song = loadSound('piano.mp3');
+    song = loadSound('Snar2.mp3');
 }
 
 function setup() {
