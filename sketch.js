@@ -88,6 +88,7 @@ function setup() { // Initialization of Canvas Properties
 	recSound = new p5.SoundFile();
 	
 	// Recording Time
+	recStored = 0; // Flag to catch if a recording has been completed
 	recTime = 0; // Counter for recording time
 	recTimeMax = 5 * fr; // Recording Time Limit (10 * fr = 10s)
 	
@@ -247,12 +248,17 @@ function draw() { // Occurs each frame
 	
 	////// Recording Button //////
 	
+	// Ignore button if press occurs during invalid time
+	if (micButton.buttonPressed && (playSButton.buttonState != 0 || playButton.buttonState !=0)) {
+		micButton.buttonPressed = 0;
+	}
 	// Enable Recording
 	if (micButton.buttonState === 0 && mic.enabled && micButton.buttonPressed) {
 		// Recording
 		rec.record(recSound);
 		micButton.buttonState++; // standby for stop
 		micButton.buttonPressed = 0; // Clear press
+		recStored =1;
 		
 	// Recording State
 	} else if (micButton.buttonState === 1) {
@@ -269,24 +275,24 @@ function draw() { // Occurs each frame
 	
 	////// "Play Sample" Button //////
 	
-	// Start Playback of Sample
-	if (playButton.buttonState === 0 && micButton.buttonState === 0 && playButton.buttonPressed) {
-		// Stop the sound first if playing
-		if (recSound.isPlaying()) {recSound.stop();}
+	// Ignore button if press occurs during invalid time
+	if (playSButton.buttonPressed && (micButton.buttonState != 0 || !recStored)) {
+		playSButton.buttonPressed = 0;
+	}
+	// Start Playback of Sample 
+	if (playSButton.buttonState === 0 && playSButton.buttonPressed) {
 		// Play 
 		recSound.play();
-		playButton.buttonState++;
-		playButton.buttonPressed = 0;
-	// Stop Playback of Sample
-	} else if (playButton.buttonState === 1 && playButton.buttonPressed) {
-		if (recSound.isPlaying()) {recSound.stop();}
-		playButton.buttonState = 0;
-		playButton.buttonPressed = 0;
-	}
-	// Reset playButton.buttonState when sound is finished playing
-	if (recSound.isPlaying() == false && playButton.buttonState === 1) {
-		playButton.buttonState = 0;
+		playSButton.buttonState++;
+		playSButton.buttonPressed = 0;
+		
+	// Stop Playback of Sample / Reset playSButton.buttonState when sound is finished playing
+	} else if (playSButton.buttonState === 1 && !recSound.isPlaying()) {
+		recSound.stop();
+		playSButton.buttonState = 0;
+		playSButton.buttonPressed = 0;
 	}		
+	
 }
 
 function mousePressed() { // Triggered when mouse button is pressed
