@@ -138,8 +138,13 @@ function setup() { // Initialization of Canvas Properties
 		sampleButtons.push(aButton);
 	}
 	
+	cursor = -1; // Cursor position (for timeline playback)
+	cursorSpeed = 0.125 * fr; // Frames until next beat
+	cursorCounter = cursorSpeed; // Countdown to next cursor position
+	
 	// Setup relative button positions
 	calibrateButtons()
+	
 	
 }
 
@@ -231,83 +236,132 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 function draw() { // Occurs each frame
 	
 	//////+ GRAPHICS +//////
-	
-	// Sample Board Mode
-	if (displayMode == 0) {
-		background(25);
-		// Display Buttons
-		for (var i=0; i<regButtons.length;i++) {
-			regButtons[i].display();
+	{
+		// Sample Board Mode
+		if (displayMode == 0) {
+			background(25);
+			// Display Buttons
+			for (var i=0; i<regButtons.length;i++) {
+				regButtons[i].display();
+			}
+			for (var i=0; i<sampleNum; i++) {
+				sampleButtons[i].display();
+			}
+		
+		// Audiovisual Mode
+		} else {
+			// STUB
 		}
-		for (var i=0; i<sampleNum; i++) {
-			sampleButtons[i].display();
-		}
-	
-	// Audiovisual Mode
-	} else {
-		// STUB
 	}
-	
-	//////+ BUTTONS +//////
+	//////+ BUTTONS +////// 
+	{	
 		// STUB: need to display recording time
 		// STUB: when implementing sequencer playback, need to be careful
 			//	to avoid interference
 	
-	////// Recording Button //////
-	
-	// Ignore button if press occurs during invalid time
-	if (micButton.buttonPressed && (playSButton.buttonState != 0 || playButton.buttonState !=0)) {
-		micButton.buttonPressed = 0;
-	}
-	// Enable Recording
-	if (micButton.buttonState === 0 && mic.enabled && micButton.buttonPressed) {
-		// Recording
-		rec.record(recSound);
-		micButton.buttonState++; // standby for stop
-		micButton.buttonPressed = 0; // Clear press
-		recStored =1;
+		////// Recording Button //////
+		{
+			// Ignore button if press occurs during invalid time
+			if (micButton.buttonPressed && (playSButton.buttonState != 0 || playButton.buttonState !=0)) {
+				micButton.buttonPressed = 0;
+			}
+			// Enable Recording
+			if (micButton.buttonState === 0 && mic.enabled && micButton.buttonPressed) {
+				// Recording
+				rec.record(recSound);
+				micButton.buttonState++; // standby for stop
+				micButton.buttonPressed = 0; // Clear press
+				recStored =1;
+				
+			// Recording State
+			} else if (micButton.buttonState === 1) {
+				recTime++
+				
+				// Stop recording? (button pressed or time up)
+				if (micButton.buttonPressed || recTime >= recTimeMax) {
+					rec.stop();
+					micButton.buttonState = 0; // Return to standby
+					micButton.buttonPressed = 0; // Clear press
+					recTime = 0; // Clear recording time counter
+				}
+			}
+		}
+		////// "Play Sample" Button //////
+		{
+			// Ignore button if press occurs during invalid time
+			if (playSButton.buttonPressed && (playButton.buttonState != 0 || micButton.buttonState != 0 || !recStored)) {
+				playSButton.buttonPressed = 0;
+			}
+			// Start Playback of Sample 
+			if (playSButton.buttonState === 0 && playSButton.buttonPressed) {
+				// Play 
+				recSound.play();
+				playSButton.buttonState = 1;
+				playSButton.buttonPressed = 0;
+				
+			// Stop Playback of Sample / Reset playSButton.buttonState when sound is finished playing
+			} else if (playSButton.buttonState === 1 && !recSound.isPlaying()) {
+				recSound.stop();
+				playSButton.buttonState = 0;
+				playSButton.buttonPressed = 0;
+			}
+		}
+		////// "Play Board" Button //////
+		{
+			// Ignore button if press occurs during invalid time
+			if (playButton.buttonPressed && (playSButton.buttonState != 0 || micButton.buttonState != 0 || !recStored)) {
+				playButton.buttonPressed = 0;
+			}
+			// Start Playback on Board
+			if (playButton.buttonState === 0 && playButton.buttonPressed) {
+				// Activate playback cursor
+				cursorCounter = cursorSpeed;
+				cursor = 0;
+				sampleButtons[cursor].active = 1;
+				playButton.buttonState = 1;
+				playButton.buttonPressed = 0;
+				
+			// Stop Playback of Sample / Reset playSButton.buttonState when sound is finished playing
+			} else if (playButton.buttonState === 1 && playButton.buttonPressed) {
+				sampleButtons[cursor].active = 0;
+				cursor = -1;
+				playButton.buttonState = 0;
+				playButton.buttonPressed = 0;
+			}
+		}
+		////// Sample Board Buttons //////
 		
-	// Recording State
-	} else if (micButton.buttonState === 1) {
-		recTime++
-		
-		// Stop recording? (button pressed or time up)
-		if (micButton.buttonPressed || recTime >= recTimeMax) {
-			rec.stop();
-			micButton.buttonState = 0; // Return to standby
-			micButton.buttonPressed = 0; // Clear press
-			recTime = 0; // Clear recording time counter
+		for (var i=0;i<sampleNum;i++) {
+			if (sampleButtons[i].buttonPressed) {
+				if (sampleButtons[i].buttonState == 0) {sampleButtons[i].buttonState = 1;}
+				else {sampleButtons[i].buttonState = 0;}
+				sampleButtons[i].buttonPressed = 0;
+			}
 		}
 	}
 	
-	////// "Play Sample" Button //////
-	
-	// Ignore button if press occurs during invalid time
-	if (playSButton.buttonPressed && (micButton.buttonState != 0 || !recStored)) {
-		playSButton.buttonPressed = 0;
-	}
-	// Start Playback of Sample 
-	if (playSButton.buttonState === 0 && playSButton.buttonPressed) {
-		// Play 
-		recSound.play();
-		playSButton.buttonState++;
-		playSButton.buttonPressed = 0;
-		
-	// Stop Playback of Sample / Reset playSButton.buttonState when sound is finished playing
-	} else if (playSButton.buttonState === 1 && !recSound.isPlaying()) {
-		recSound.stop();
-		playSButton.buttonState = 0;
-		playSButton.buttonPressed = 0;
-	}
-	
-	////// Sample Board Buttons //////
-	
-	for (var i=0;i<sampleNum;i++) {
-		if (sampleButtons[i].buttonPressed) {
-			if (sampleButtons[i].buttonState == 0) {sampleButtons[i].buttonState = 1;}
-			else {sampleButtons[i].buttonState = 0;}
-			sampleButtons[i].buttonPressed = 0;
+	//////+ FUNCTION +//////
+	{
+		// Sample Board Cursor Counter
+		if (cursor >= 0) {
+			cursorCounter -= 1;
+			if (cursorCounter <=0) { // Counter has expired
+				sampleButtons[cursor].active = 0;
+				cursor++;
+				cursorCounter = cursorSpeed;
+				if (cursor >= sampleNum) { // Loop cursor position
+					cursor = 0;
+				}
+				sampleButtons[cursor].active = 1;
+				
+				// Play Sound 
+				if (sampleButtons[cursor].buttonState == 1) {
+					recSound.play();
+				}
+			}
+			
 		}
+		
 	}
 }
 
