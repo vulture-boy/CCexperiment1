@@ -47,6 +47,7 @@ function preload() { // Preload graphical assets
 	img_board_on_act = loadImage('/images/button_gfx/board/board_inA.png');
 	img_board_off_act = loadImage('/images/button_gfx/board/board_outA.png');
 	img_board_press_act = loadImage('/images/button_gfx/board/board_outA.png');
+	img_cursor = loadImage('/images/button_gfx/board/cursor.png');
 	img_mic_on = loadImage('/images/button_gfx/mic/mic_on.png');
 	img_mic_off = loadImage('/images/button_gfx/mic/mic_off.png');
 	img_mic_press = loadImage('/images/button_gfx/mic/mic_press.png');
@@ -106,7 +107,7 @@ function setup() { // Initialization of Canvas Properties
 	
 	// Play Buttons
 	playSX = 0.2;
-	playSY = 0.1;
+	playSY = 0.12;
 	playX = playSX;
 	playY = playSY + 0.1;
 	playSize = 0.04;
@@ -121,11 +122,11 @@ function setup() { // Initialization of Canvas Properties
 	
 	// Sample Board Buttons
 	sampleButtons = [];
-	sampleX = 0.07; // Top Left of Sample Board
-	sampleY = 0.3;
-	sampleSize = 0.1; // Scaling Size
-	sampleOffsetX = 0.08; // Spacing between buttons
-	sampleOffsetY = 0.012;
+	sampleX = 0.1; // Top Left of Sample Board
+	sampleY = 0.328;
+	sampleSize = 0.03; // Scaling Size
+	sampleOffsetX = 0.04; // Spacing between buttons
+	sampleOffsetY = 0.01;
 	sampleCols = 8; // No. columns of buttons
 	sampleNum = sampleCols*4; // No. of sample buttons
 	for (var i=0; i<sampleNum; i++) {
@@ -152,6 +153,7 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 	this.buttonPressed = 0;
 	this.myImage = img_board_off;
 	this.mode = 0; // Type of Button
+	this.active = 0; // Whether the button is active (board)
 	
 	// Updates button image
 	this.update = function() {
@@ -170,9 +172,9 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 			
 			case 1: // Sample Playback
 				if (this.buttonPressed == 0) {
-					if (this.buttonState == 0) {
+					if (this.buttonState == 0) { // Off State
 						this.myImage = img_play_sample_off;
-					} else if (this.buttonState == 1) {
+					} else if (this.buttonState == 1) { // On State
 						this.myImage = img_play_sample_on;
 					}
 				} else {
@@ -182,9 +184,9 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 			
 			case 2: // Board Playback 
 				if (this.buttonPressed == 0) {
-					if (this.buttonState == 0) {
+					if (this.buttonState == 0) { // Off State
 						this.myImage = img_play_board_off;
-					} else if (this.buttonState == 1) {
+					} else if (this.buttonState == 1) { // On State
 						this.myImage = img_play_board_on;
 					}
 				} else {
@@ -193,14 +195,19 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 			break;
 			
 			case 3: // Board Button
-				if (this.buttonPressed == 0) {
-					if (this.buttonState == 0) {
-						this.myImage = img_board_off;
-					} else if (this.buttonState == 1) {
-						this.myImage = img_board_on;
+				if (this.buttonPressed == 0) { // Button not pressed?
+				
+					if (this.buttonState == 0) { // Off State
+						if (this.active) {this.myImage = img_board_off_act;} // Check active state
+						else {this.myImage = img_board_off;}
+						
+					} else if (this.buttonState == 1) { // On State
+						if (this.active) {this.myImage = img_board_on_act;} // Check active state
+						else {this.myImage = img_board_on;}
 					}
-				} else {
-					this.myImage = img_board_press;
+				} else { // Button Pressed
+					if (this.active) {this.myImage = img_board_press_act;} // Check active state
+					else {this.myImage = img_board_press;}
 				}
 			break;
 			
@@ -291,8 +298,17 @@ function draw() { // Occurs each frame
 		recSound.stop();
 		playSButton.buttonState = 0;
 		playSButton.buttonPressed = 0;
-	}		
+	}
 	
+	////// Sample Board Buttons //////
+	
+	for (var i=0;i<sampleNum;i++) {
+		if (sampleButtons[i].buttonPressed) {
+			if (sampleButtons[i].buttonState == 0) {sampleButtons[i].buttonState = 1;}
+			else {sampleButtons[i].buttonState = 0;}
+			sampleButtons[i].buttonPressed = 0;
+		}
+	}
 }
 
 function mousePressed() { // Triggered when mouse button is pressed
