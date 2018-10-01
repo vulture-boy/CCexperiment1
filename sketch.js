@@ -112,24 +112,18 @@ function setup() { // Initialization of Canvas Properties
 	selector = createSelect();
 	selector.position(10,10);
 	selector.option('Volume');
-	selector.option('Delay');
-	selector.option('Filter');
+	selector.option('Dry-Wet');
 	selector.option('Reverb');
 	selector.changed(selectorEvent);
 	selector.style('width', selWidth);
 	
 	// Slider
 		// STUB: proportionals
-	slider = createSlider(0,255,0,1);
+	slider = createSlider(0,100,0,1);
 	slider.position(10,40);
 	slider.style('width', selWidth);
-	
-	/*
-	masterVolume(vol) - 0 to 1 (0.5: default)
-	.setVolume(vol) - 0 to 1 (0.5: default)
-	.drywet(val) - 0 to 1
-	*/
-	
+	slider.changed(sliderEvent);
+	selectorEvent(); // Prepare slider init value based on selector
 	
 }
 
@@ -143,8 +137,35 @@ function numToTime(num) { // Converts an int to a time string
 	return timeReadout;
 }
 
-function selectorEvent() {
+function sliderEvent() { // Triggered on slider manipulation
+	var value = (slider.value() / 100);
 	var item = selector.value();
+	switch (item) {
+		case 'Volume':
+			masterVolume(value);
+		break;
+		case 'Dry-Wet':
+			recSound.drywet(value);
+		break;
+		case 'Reverb':
+		break;
+		
+	}
+}
+
+function selectorEvent() { // Triggered on selector manipulation
+	var item = selector.value();
+	switch (item) { // Set to current value
+		case 'Volume':
+			slider.value(masterVolume() * 100);
+		break;
+		case 'Dry-Wet':
+			slider.value(recSound.drywet() * 100);
+		break;
+		case 'Reverb':
+		break;
+		
+	}
 	// STUB: Modify slider values / target
 }
 
@@ -380,7 +401,6 @@ function mousePressed() { // Triggered when mouse button is pressed
 	}
 	
 	// Sample Board Buttons
-	// STUB: Need to redo button graphics; glow should be seperate image
 	for (var i=0;i<sampleNum;i++) {
 		var xCheck = (sampleButtons[i].x < mouseX) && (sampleButtons[i].x + sampleButtons[i].proport > mouseX);
 		var yCheck = (sampleButtons[i].y < mouseY) && (sampleButtons[i].y + sampleButtons[i].proport > mouseY);
