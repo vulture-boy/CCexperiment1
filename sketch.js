@@ -3,7 +3,7 @@ See README for details
 */
 
 function preload() { // Preload graphical assets
-	img_board_on = loadImage('/images/button_gfx/board/board_in.png');
+	img_board_on = loadImage('./images/button_gfx/board/board_in.png');
 	img_board_off = loadImage('/images/button_gfx/board/board_out.png');
 	img_board_press = loadImage('/images/button_gfx/board/board_out.png');
 	img_board_on_act = loadImage('/images/button_gfx/board/board_inA.png');
