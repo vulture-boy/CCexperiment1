@@ -11,7 +11,7 @@ function preload() { // Preload graphical assets
 	img_board_press_act = loadImage('/images/button/board/board_outA.png');
 	img_cursor = loadImage('/images/button/board/cursor.png');
 	img_mic_on = loadImage('/images/button/mic/mic_on.png');
-	img_mic_off = loadImage('/images/button/mic/mic_off.png');
+	img_mic_off = loadImage('/images/micOff.png');
 	img_mic_press = loadImage('/images/button/mic/mic_press.png');
 	img_play_board_on = loadImage('/images/button/play/play_on.png');
 	img_play_board_off = loadImage('/images/button/play/play_off.png');
