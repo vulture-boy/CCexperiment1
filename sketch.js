@@ -386,9 +386,7 @@ function draw() { // Occurs each frame
 	}
 }
 
-function mousePressed() { // Triggered when mouse button is pressed
-	
-	// Check for Button Presses
+function touchStarted() { // Triggered when mouse button is pressed / touch
 	
 	// Mic Button
 	// STUB: Probably should make the mic icon colour stay consistent
@@ -408,6 +406,10 @@ function mousePressed() { // Triggered when mouse button is pressed
 			sampleButtons[i].buttonPressed = 1;
 		}
 	}
+	
+	// Enable Full Screen automatically
+	var fs = fullscreen();
+	if (!fs) {fullscreen(1);}
 	
 }
 
