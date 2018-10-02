@@ -3,10 +3,10 @@ See README for details
 */
 
 function preload() { // Preload graphical assets
-	img_board_on = loadImage('CCexperiment1/images/boardIn.png');
-	img_board_off = loadImage('CCexperiment1/images/boardOut.png');
-	img_board_press = loadImage('CCexperiment1/images/boardOut.png');
-	img_board_on_act = loadImage('CCexperiment1/images/boardInA.png');
+	img_board_on = loadImage('images/boardIn.png');
+	img_board_off = loadImage('images/boardOut.png');
+	img_board_press = loadImage('images/boardOut.png');
+	img_board_on_act = loadImage('images/boardInA.png');
 	img_board_off_act = loadImage('images/boardOutA.png');
 	img_board_press_act = loadImage('images/boardOutA.png');
 	img_cursor = loadImage('images/cursor.png');
