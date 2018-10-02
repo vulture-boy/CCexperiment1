@@ -3,22 +3,22 @@ See README for details
 */
 
 function preload() { // Preload graphical assets
-	img_board_on = loadImage('./images/button/board/board_in.png');
-	img_board_off = loadImage('/images/button/board/board_out.png');
-	img_board_press = loadImage('/images/button/board/board_out.png');
-	img_board_on_act = loadImage('/images/button/board/board_inA.png');
-	img_board_off_act = loadImage('/images/button/board/board_outA.png');
-	img_board_press_act = loadImage('/images/button/board/board_outA.png');
-	img_cursor = loadImage('/images/button/board/cursor.png');
-	img_mic_on = loadImage('/images/button/mic/mic_on.png');
+	img_board_on = loadImage('./images/boardIn.png');
+	img_board_off = loadImage('/images/boardOut.png');
+	img_board_press = loadImage('/images/boardOut.png');
+	img_board_on_act = loadImage('/images/boardInA.png');
+	img_board_off_act = loadImage('/images/boardOutA.png');
+	img_board_press_act = loadImage('/images/boardOutA.png');
+	img_cursor = loadImage('/images/cursor.png');
+	img_mic_on = loadImage('/images/micOn.png');
 	img_mic_off = loadImage('/images/micOff.png');
-	img_mic_press = loadImage('/images/button/mic/mic_press.png');
-	img_play_board_on = loadImage('/images/button/play/play_on.png');
-	img_play_board_off = loadImage('/images/button/play/play_off.png');
-	img_play_board_press = loadImage('/images/button/play/play_press.png');
-	img_play_sample_on = loadImage('/images/button/play/playS_on.png');
-	img_play_sample_off = loadImage('/images/button/play/playS_off.png');
-	img_play_sample_press = loadImage('/images/button/play/playS_press.png');
+	img_mic_press = loadImage('/images/micPress.png');
+	img_play_board_on = loadImage('/images/playOn.png');
+	img_play_board_off = loadImage('/images/playOff.png');
+	img_play_board_press = loadImage('/images/playPress.png');
+	img_play_sample_on = loadImage('/images/playSOn.png');
+	img_play_sample_off = loadImage('/images/playSOff.png');
+	img_play_sample_press = loadImage('/images/playSPress.png');
 	
 }
 
