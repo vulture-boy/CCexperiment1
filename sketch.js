@@ -65,7 +65,6 @@ function setup() { // Initialization of Canvas Properties
 	micButton = new Button(0,0,0,0,0);
 	micButton.myImage = img_mic_off;
 	micButton.mode = 0;
-	micButton.mousePressed(buttonClick);
 	regButtons.push(micButton);
 	
 	// Play Buttons
@@ -77,12 +76,10 @@ function setup() { // Initialization of Canvas Properties
 	playSButton = new Button(0,0,0,0,0); // Play Sample
 	playSButton.myImage = img_play_sample_off;
 	playSButton.mode = 1;
-	playSButton.mousePressed(buttonClick);
 	regButtons.push(playSButton);
 	playButton = new Button(0,0,0,0,0); // Play Board
 	playButton.myImage = img_play_board_off;
 	playButton.mode = 2;
-	playButton.mousePressed(buttonClick);
 	regButtons.push(playButton);
 	
 	// Sample Board Buttons
@@ -100,7 +97,6 @@ function setup() { // Initialization of Canvas Properties
 		var aButton = new Button(0,0,sampleSize, xPos, yPos);
 		aButton.myImage = img_board_off;
 		aButton.mode = 3;
-		aButton.mousePressed(buttonClick);
 		sampleButtons.push(aButton);
 	}
 	
@@ -396,7 +392,6 @@ function draw() { // Occurs each frame
 
 function mousePressed() { // Triggered when mouse button is pressed / touch
 	
-	/*
 	// Mic Button
 	// STUB: Probably should make the mic icon colour stay consistent
 	for (var i=0;i<regButtons.length;i++) {
@@ -415,7 +410,7 @@ function mousePressed() { // Triggered when mouse button is pressed / touch
 			sampleButtons[i].buttonPressed = 1;
 		}
 	}
-	*/
+	
 	// Enable Full Screen automatically
 	var fs = fullscreen();
 	if (!fs) {fullscreen(1);}
