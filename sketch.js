@@ -37,7 +37,8 @@ function setup() { // Initialization of Canvas Properties
 	displayMode = 0; // 0 - Board || 1 - Graphics
 	
 	// Used when determining drawing perspective
-	windowDims();
+	nativeX = 1920; // Mockup proportions
+	nativeY = 1080;
 	
 	////// Sound //////
 	
@@ -59,42 +60,40 @@ function setup() { // Initialization of Canvas Properties
 	regButtons = [];
 	
 	// Mic Button
-	micX = 0.1;
-	micY = 0.1;
-	micSize = 0.1;
-	micButton = new Button(0,0,0,0,0);
+	micX = 54;
+	micY = 50;
+	micButton = new Button(micX,micY);
 	micButton.myImage = img_mic_off;
 	micButton.mode = 0;
 	regButtons.push(micButton);
 	
 	// Play Buttons
-	playSX = 0.2;
-	playSY = 0.12;
+	playSX = 442;
+	playSY = 70;
 	playX = playSX;
-	playY = playSY + 0.1;
-	playSize = 0.04;
-	playSButton = new Button(0,0,0,0,0); // Play Sample
+	playY = 232;
+	playSButton = new Button(playSX,playSY); // Play Sample
 	playSButton.myImage = img_play_sample_off;
 	playSButton.mode = 1;
 	regButtons.push(playSButton);
-	playButton = new Button(0,0,0,0,0); // Play Board
+	playButton = new Button(playX,playY); // Play Board
 	playButton.myImage = img_play_board_off;
 	playButton.mode = 2;
 	regButtons.push(playButton);
 	
 	// Sample Board Buttons
 	sampleButtons = [];
-	sampleX = 0.1; // Top Left of Sample Board
-	sampleY = 0.328;
-	sampleSize = 0.03; // Scaling Size
-	sampleOffsetX = 0.04; // Spacing between buttons
-	sampleOffsetY = 0.01;
+	sampleX = 54; // Top Left of Sample Board
+	sampleY = 460;
+	sampleOffsetX = img_board_on.width + 40; // Spacing between buttons
+	sampleOffsetY = img_board_on.height + 40;
 	sampleCols = 8; // No. columns of buttons
-	sampleNum = sampleCols*4; // No. of sample buttons
+	sampleNum = 4 * sampleCols; // No. of sample buttons
 	for (var i=0; i<sampleNum; i++) {
 		var xPos = (i % sampleCols);
-		var yPos = i - xPos;
-		var aButton = new Button(0,0,sampleSize, xPos, yPos);
+		var yPos = (i - xPos) / sampleCols;
+		print(yPos);
+		var aButton = new Button(sampleX + xPos * sampleOffsetX,sampleY + yPos * sampleOffsetY);
 		aButton.myImage = img_board_off;
 		aButton.mode = 3;
 		sampleButtons.push(aButton);
@@ -103,9 +102,6 @@ function setup() { // Initialization of Canvas Properties
 	cursor = -1; // Cursor position (for timeline playback)
 	cursorSpeed = 0.125 * fr; // Frames until next beat
 	cursorCounter = cursorSpeed; // Countdown to next cursor position
-	
-	// Setup relative button positions
-	calibrateButtons()
 	
 	// Selector
 	selWidth = '180px';
@@ -135,10 +131,6 @@ function numToTime(num) { // Converts an int to a time string
 		timeReadout = "0" + timeReadout;
 	}
 	return timeReadout;
-}
-
-function buttonClick() {
-	this.buttonPressed = 1;
 }
 
 function sliderEvent() { // Triggered on slider manipulation
@@ -173,12 +165,9 @@ function selectorEvent() { // Triggered on selector manipulation
 	// STUB: Modify slider values / target
 }
 
-function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
+function Button(xOrigin,yOrigin) { // Standard Button Object
 	this.x = xOrigin; // Top Left of Button
 	this.y = yOrigin;
-	this.xRel = xPos; // Relative position in Array
-	this.yRel = yPos;
-	this.proport = proport; // Scale Size
 	this.buttonState = 0;
 	this.buttonPressed = 0;
 	this.myImage = img_board_off;
@@ -253,9 +242,12 @@ function Button(xOrigin,yOrigin,proport, xPos, yPos) { // Standard Button Object
 	// Displays button
 	this.display = function() {
 		this.update();
-		image(this.myImage,this.x,this.y,this.proport,this.proport);
+		var xPos = (this.x / nativeX) * windowWidth;
+		var yPos = (this.y / nativeY) * windowHeight;
+		var xScale = (windowWidth / nativeX) * this.myImage.width;
+		var yScale = (windowHeight / nativeY) * this.myImage.height;
+		image(this.myImage,xPos,yPos,xScale,yScale);
 	}
-	
 }
 
 function draw() { // Occurs each frame
@@ -395,8 +387,10 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 	// Mic Button
 	// STUB: Probably should make the mic icon colour stay consistent
 	for (var i=0;i<regButtons.length;i++) {
-		var xCheck = (regButtons[i].x < mouseX) && (regButtons[i].x + regButtons[i].proport > mouseX);
-		var yCheck = (regButtons[i].y < mouseY) && (regButtons[i].y + regButtons[i].proport > mouseY);
+		var xScale = (windowWidth / nativeX) * regButtons[i].myImage.width;
+		var yScale = (windowHeight / nativeY) * regButtons[i].myImage.height;
+		var xCheck = (regButtons[i].x < mouseX) && (regButtons[i].x + xScale > mouseX);
+		var yCheck = (regButtons[i].y < mouseY) && (regButtons[i].y + yScale > mouseY);
 		if (xCheck && yCheck) {
 			regButtons[i].buttonPressed = 1;
 		}
@@ -404,8 +398,10 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 	
 	// Sample Board Buttons
 	for (var i=0;i<sampleNum;i++) {
-		var xCheck = (sampleButtons[i].x < mouseX) && (sampleButtons[i].x + sampleButtons[i].proport > mouseX);
-		var yCheck = (sampleButtons[i].y < mouseY) && (sampleButtons[i].y + sampleButtons[i].proport > mouseY);
+		var xScale = (windowWidth / nativeX) * sampleButtons[i].myImage.width;
+		var yScale = (windowHeight / nativeY) * sampleButtons[i].myImage.height;
+		var xCheck = (sampleButtons[i].x < mouseX) && (sampleButtons[i].x + xScale > mouseX);
+		var yCheck = (sampleButtons[i].y < mouseY) && (sampleButtons[i].y + yScale > mouseY);
 		if (xCheck && yCheck) {
 			sampleButtons[i].buttonPressed = 1;
 		}
@@ -420,33 +416,4 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 
 function windowResized() { // Triggered when window is resized
 	resizeCanvas(windowWidth,windowHeight);
-	windowDims();
-	calibrateButtons();
 }
-
-function windowDims() { // Gets Window Dimension Properties 
-	windowMax = max(windowWidth,windowHeight);
-	windowMin = min(windowWidth,windowHeight);
-	windowOrient = (windowWidth > windowHeight);
-}
-
-function calibrateButtons() { // Refreshes Button Size & Position
-	// Standard Button Proportions
-	micButton.x = micX * windowMax; // Mic Button
-	micButton.y = micY * windowMin;
-	micButton.proport = micSize * windowMax;
-	playButton.x = playX * windowMax; // Play Button
-	playButton.y = playY * windowMin;
-	playButton.proport = playSize * windowMax;
-	playSButton.x = playSX * windowMax; // Play Sample Button
-	playSButton.y = playSY * windowMin;
-	playSButton.proport = playSize * windowMax;
-	
-	// Sampler Buttons
-	for (var i=0; i<sampleNum; i++) {
-		sampleButtons[i].x = sampleX * windowMax + sampleButtons[i].xRel * sampleOffsetX * windowMax;
-		sampleButtons[i].y = sampleY * windowMin + sampleButtons[i].yRel * sampleOffsetY * windowMin;
-		sampleButtons[i].proport = sampleSize * windowMax
-	}
-}
-
