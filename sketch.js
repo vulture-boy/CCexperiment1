@@ -407,11 +407,14 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 		}
 	}
 	
+	return false;
+}
+
+function mousePressed() {
 	// Enable Full Screen automatically
 	var fs = fullscreen();
 	if (!fs) {fullscreen(1);}
 	
-	return false;
 }
 
 function windowResized() { // Triggered when window is resized
