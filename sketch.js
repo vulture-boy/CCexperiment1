@@ -386,7 +386,7 @@ function draw() { // Occurs each frame
 	}
 }
 
-function touchStarted() { // Triggered when mouse button is pressed / touch
+function mousePressed() { // Triggered when mouse button is pressed / touch
 	
 	// Mic Button
 	// STUB: Probably should make the mic icon colour stay consistent
