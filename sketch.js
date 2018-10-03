@@ -102,24 +102,33 @@ function setup() { // Initialization of Canvas Properties
 	cursorSpeed = 0.125 * fr; // Frames until next beat
 	cursorCounter = cursorSpeed; // Countdown to next cursor position
 	
-	// Selector
-	selWidth = '180px';
+	// Selector & Slider
 	selector = createSelect();
-	selector.position(10,10);
 	selector.option('Volume');
 	selector.option('Dry-Wet');
 	selector.option('Reverb');
 	selector.changed(selectorEvent);
-	selector.style('width', selWidth);
 	
-	// Slider
-		// STUB: proportionals
 	slider = createSlider(0,100,0,1);
-	slider.position(10,40);
-	slider.style('width', selWidth);
 	slider.changed(sliderEvent);
 	selectorEvent(); // Prepare slider init value based on selector
 	
+	selectorUpdate(); // Update positions of selector / slider
+	
+}
+
+function selectorUpdate() {
+	selWidth = nf(windowWidth/6) + 'px';
+	selHeight = nf(windowHeight/24) + 'px';
+	selX = windowWidth / 3;
+	selY = windowHeight/10;
+	slideY = windowHeight/7;
+	selector.style('width', selWidth);
+	selector.style('height', selHeight);
+	slider.style('width', selWidth);
+	slider.style('height', selHeight);
+	selector.position(selX,selY);
+	slider.position(selX,slideY);
 }
 
 function numToTime(num) { // Converts an int to a time string
@@ -422,4 +431,5 @@ function mousePressed() {
 
 function windowResized() { // Triggered when window is resized
 	resizeCanvas(windowWidth,windowHeight);
+	selectorUpdate();
 }
