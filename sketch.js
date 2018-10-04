@@ -69,9 +69,9 @@ function setup() { // Initialization of Canvas Properties
 	
 	// Play Buttons
 	playSX = 442;
-	playSY = 70;
+	playSY = 80;
 	playX = playSX;
-	playY = 232;
+	playY = 260;
 	playSButton = new Button(playSX,playSY); // Play Sample
 	playSButton.myImage = img_play_sample_off;
 	playSButton.mode = 1;
@@ -84,7 +84,7 @@ function setup() { // Initialization of Canvas Properties
 	// Sample Board Buttons
 	sampleButtons = [];
 	sampleX = 54; // Top Left of Sample Board
-	sampleY = 460;
+	sampleY = 468;
 	sampleOffsetX = img_board_on.width + 40; // Spacing between buttons
 	sampleOffsetY = img_board_on.height + 40;
 	sampleCols = 8; // No. columns of buttons
@@ -105,12 +105,14 @@ function setup() { // Initialization of Canvas Properties
 	// Selector & Slider
 	selector = createSelect();
 	selector.option('Volume');
+	selector.option('Rate');
 	selector.option('Dry-Wet');
 	selector.option('Reverb');
 	selector.changed(selectorEvent);
 	
 	slider = createSlider(0,100,0,1);
 	slider.changed(sliderEvent);
+	selector.style('border-radius', '2vh');
 	selectorEvent(); // Prepare slider init value based on selector
 	
 	selectorUpdate(); // Update positions of selector / slider
@@ -119,10 +121,10 @@ function setup() { // Initialization of Canvas Properties
 
 function selectorUpdate() {
 	selWidth = nf(windowWidth/6) + 'px';
-	selHeight = nf(windowHeight/24) + 'px';
+	selHeight = nf(windowHeight/12) + 'px';
 	selX = windowWidth / 3;
 	selY = windowHeight/10;
-	slideY = windowHeight/7;
+	slideY = windowHeight/6;
 	selector.style('width', selWidth);
 	selector.style('height', selHeight);
 	slider.style('width', selWidth);
@@ -144,9 +146,13 @@ function numToTime(num) { // Converts an int to a time string
 function sliderEvent() { // Triggered on slider manipulation
 	var value = (slider.value() / 100);
 	var item = selector.value();
+	var rateRange = 4;
 	switch (item) {
 		case 'Volume':
 			masterVolume(value);
+		break;
+		case 'Rate':
+			recSound.rate(value * rateRange)
 		break;
 		case 'Dry-Wet':
 			recSound.drywet(value);
@@ -162,6 +168,9 @@ function selectorEvent() { // Triggered on selector manipulation
 	switch (item) { // Set to current value
 		case 'Volume':
 			slider.value(masterVolume() * 100);
+		break;
+		case 'Rate':
+			// slider.value(recSound.rate() * 
 		break;
 		case 'Dry-Wet':
 			slider.value(recSound.drywet() * 100);
@@ -264,7 +273,7 @@ function draw() { // Occurs each frame
 	{
 		// Sample Board Mode
 		if (displayMode == 0) {
-			background(25);
+			background(250);
 			// Display Buttons
 			for (var i=0; i<regButtons.length;i++) {
 				regButtons[i].display();
@@ -333,6 +342,7 @@ function draw() { // Occurs each frame
 		}
 		////// "Play Board" Button //////
 		{
+			
 			// Ignore button if press occurs during invalid time
 			if (playButton.buttonPressed && (playSButton.buttonState != 0 || micButton.buttonState != 0 || !recStored)) {
 				playButton.buttonPressed = 0;
@@ -426,7 +436,6 @@ function mousePressed() {
 	// Enable Full Screen automatically
 	var fs = fullscreen();
 	if (!fs) {fullscreen(1);}
-	
 }
 
 function windowResized() { // Triggered when window is resized
