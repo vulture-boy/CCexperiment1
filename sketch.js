@@ -106,6 +106,7 @@ function setup() { // Initialization of Canvas Properties
 	selector = createSelect();
 	selector.option('Volume');
 	selector.option('Rate');
+		rateRange = 4;
 	selector.option('Dry-Wet');
 	selector.option('Reverb');
 	selector.changed(selectorEvent);
@@ -146,7 +147,6 @@ function numToTime(num) { // Converts an int to a time string
 function sliderEvent() { // Triggered on slider manipulation
 	var value = (slider.value() / 100);
 	var item = selector.value();
-	var rateRange = 4;
 	switch (item) {
 		case 'Volume':
 			masterVolume(value);
@@ -170,7 +170,7 @@ function selectorEvent() { // Triggered on selector manipulation
 			slider.value(masterVolume() * 100);
 		break;
 		case 'Rate':
-			// slider.value(recSound.rate() * 
+			slider.value(recSound.rate() * 100 /4); 
 		break;
 		case 'Dry-Wet':
 			slider.value(recSound.drywet() * 100);
