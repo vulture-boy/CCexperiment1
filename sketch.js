@@ -182,7 +182,7 @@ function sliderEvent() { // Triggered on slider manipulation
 		case 'Volume':
 			masterVolume(value);
 		break;
-		case 'Rate':
+		case 'Pitch':
 			recSound.rate(value * rateRange);
 		break;
 		case 'Playback':
@@ -202,7 +202,7 @@ function selectorEvent() { // Triggered on selector manipulation
 		case 'Volume':
 			slider.value(masterVolume() * 100);
 		break;
-		case 'Rate':
+		case 'Pitch':
 			slider.value(recSound.rate() * 100 / rateRange); 
 		break;
 		case 'Playback':
