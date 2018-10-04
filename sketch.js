@@ -19,7 +19,7 @@ function preload() { // Preload graphical assets
 	img_play_sample_on = loadImage('images/playSOn.png');
 	img_play_sample_off = loadImage('images/playSOff.png');
 	img_play_sample_press = loadImage('images/playSPress.png');
-	
+	img_logo = loadImage('images/logo.png');
 }
 
 function setup() { // Initialization of Canvas Properties
@@ -34,7 +34,9 @@ function setup() { // Initialization of Canvas Properties
 	getAudioContext().resume(); // Overrides sound setting
 	
 	// Indicates display mode
-	displayMode = 0; // 0 - Board || 1 - Graphics
+	dispMode = 0; // 0 - Board || 1 - Graphics
+	modeSwitchDelay = 0; // Counter to prevent mode switching issues
+	modeSwitchStart = 1.5 * fr; // Counter Value to activate mSD
 	
 	// Used when determining drawing perspective
 	nativeX = 1920; // Mockup proportions
@@ -58,6 +60,14 @@ function setup() { // Initialization of Canvas Properties
 	
 	////// Initialize Button objects //////
 	regButtons = [];
+	
+	// Logo (dummy button)
+	logoX = 1920/3;
+	logoY = 86;
+	logoButton = new Button(logoX,logoY);
+	logoButton.myImage = img_logo;
+	logoButton.mode = 5;
+	regButtons.push(logoButton);
 	
 	// Mic Button
 	micX = 54;
@@ -103,12 +113,18 @@ function setup() { // Initialization of Canvas Properties
 	cursorCounter = cursorSpeed; // Countdown to next cursor position
 	
 	// Selector & Slider
+	modeButton = createButton('Audio-Visual');
+	modeButton.mousePressed(modeChange);
+	
 	selector = createSelect();
+	selector.mouseClicked(touchStarted);
 	selector.option('Volume');
-	selector.option('Rate');
+	selector.option('Pitch');
 		rateRange = 4;
-	selector.option('Dry-Wet');
-	selector.option('Reverb');
+	selector.option('Playback');
+		cursorRange = 0.5 * fr;
+	//selector.option('Dry-Wet');
+	//selector.option('Reverb');
 	selector.changed(selectorEvent);
 	
 	slider = createSlider(0,100,0,1);
@@ -118,30 +134,41 @@ function setup() { // Initialization of Canvas Properties
 	
 	selectorUpdate(); // Update positions of selector / slider
 	
+	
+}
+
+function modeChange() { // Toggles between audiovisual mode and soundboard mode
+	if (dispMode == 0) {
+		dispMode = 1;
+		selector.hide();
+		slider.hide();
+		modeButton.hide();
+		modeSwitchDelay = modeSwitchStart;
+	} else if (dispMode == 1 && modeSwitchDelay <= 0) {
+		dispMode = 0;
+		selector.show();
+		slider.show();
+		modeButton.show();
+	}
 }
 
 function selectorUpdate() {
 	selWidth = nf(windowWidth/6) + 'px';
+	slideWidth = nf(windowWidth/3) + 'px';
 	selHeight = nf(windowHeight/12) + 'px';
 	selX = windowWidth / 3;
-	selY = windowHeight/10;
-	slideY = windowHeight/6;
+	butX = selX + windowWidth/6 + 4;
+	selY = windowHeight/5;
+	slideY = windowHeight/3.5;
 	selector.style('width', selWidth);
 	selector.style('height', selHeight);
-	slider.style('width', selWidth);
+	slider.style('width', slideWidth);
 	slider.style('height', selHeight);
+	modeButton.style('width', selWidth);
+	modeButton.style('height', selHeight);
 	selector.position(selX,selY);
 	slider.position(selX,slideY);
-}
-
-function numToTime(num) { // Converts an int to a time string
-	
-	// STUB: Incomplete
-	timeReadout = nf(num);
-	if (timeReadout.length == 1) {
-		timeReadout = "0" + timeReadout;
-	}
-	return timeReadout;
+	modeButton.position(butX,selY);
 }
 
 function sliderEvent() { // Triggered on slider manipulation
@@ -152,10 +179,11 @@ function sliderEvent() { // Triggered on slider manipulation
 			masterVolume(value);
 		break;
 		case 'Rate':
-			recSound.rate(value * rateRange)
+			recSound.rate(value * rateRange);
 		break;
+		case 'Playback':
+			cursorSpeed = value * fr;
 		case 'Dry-Wet':
-			recSound.drywet(value);
 		break;
 		case 'Reverb':
 		break;
@@ -165,15 +193,19 @@ function sliderEvent() { // Triggered on slider manipulation
 
 function selectorEvent() { // Triggered on selector manipulation
 	var item = selector.value();
+	slider.step = 1;
 	switch (item) { // Set to current value
 		case 'Volume':
 			slider.value(masterVolume() * 100);
 		break;
 		case 'Rate':
-			slider.value(recSound.rate() * 100 /4); 
+			slider.value(recSound.rate() * 100 / rateRange); 
+		break;
+		case 'Playback':
+			slider.value(cursorSpeed * 100 / fr);
+			slider.step = 12.5;
 		break;
 		case 'Dry-Wet':
-			slider.value(recSound.drywet() * 100);
 		break;
 		case 'Reverb':
 		break;
@@ -272,7 +304,10 @@ function draw() { // Occurs each frame
 	//////+ GRAPHICS +//////
 	{
 		// Sample Board Mode
-		if (displayMode == 0) {
+		if (modeSwitchDelay >=0) { // Delay before allowing mode change from audiovisual
+			modeSwitchDelay--;
+		}
+		if (dispMode == 0) {
 			background(250);
 			// Display Buttons
 			for (var i=0; i<regButtons.length;i++) {
@@ -284,6 +319,7 @@ function draw() { // Occurs each frame
 		
 		// Audiovisual Mode
 		} else {
+			background(250);
 			// STUB
 		}
 	}
@@ -403,7 +439,6 @@ function draw() { // Occurs each frame
 function touchStarted() { // Triggered when mouse button is pressed / touch
 	
 	// Mic Button
-	// STUB: Probably should make the mic icon colour stay consistent
 	for (var i=0;i<regButtons.length;i++) {
 		var xScale = (windowWidth / nativeX) * regButtons[i].myImage.width;
 		var yScale = (windowHeight / nativeY) * regButtons[i].myImage.height;
@@ -436,6 +471,12 @@ function mousePressed() {
 	// Enable Full Screen automatically
 	var fs = fullscreen();
 	if (!fs) {fullscreen(1);}
+	
+	if (dispMode == 1) {
+		if (modeSwitchDelay <= 0) {
+			modeChange();
+		}
+	}
 }
 
 function windowResized() { // Triggered when window is resized
