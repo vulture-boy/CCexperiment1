@@ -117,7 +117,6 @@ function setup() { // Initialization of Canvas Properties
 	modeButton.mousePressed(modeChange);
 	
 	selector = createSelect();
-	selector.mouseClicked(touchStarted);
 	selector.option('Volume');
 	selector.option('Pitch');
 		rateRange = 4;
@@ -438,27 +437,33 @@ function draw() { // Occurs each frame
 
 function touchStarted() { // Triggered when mouse button is pressed / touch
 	
-	// Mic Button
+	// Std Buttons
 	for (var i=0;i<regButtons.length;i++) {
-		var xScale = (windowWidth / nativeX) * regButtons[i].myImage.width;
-		var yScale = (windowHeight / nativeY) * regButtons[i].myImage.height;
 		var xPos =(regButtons[i].x / nativeX) * windowWidth;
 		var yPos =(regButtons[i].y / nativeY) * windowHeight;
-		var xCheck = (xPos < mouseX) && (regButtons[i].x + xScale > mouseX);
-		var yCheck = (yPos < mouseY) && (regButtons[i].y + yScale > mouseY);
+		var xScale = (windowWidth / nativeX) * regButtons[i].myImage.width;
+		var yScale = (windowHeight / nativeY) * regButtons[i].myImage.height;
+		var xCheck = (xPos < mouseX) && ((xPos + xScale) > mouseX);
+		var yCheck = (yPos < mouseY) && ((yPos + yScale) > mouseY);
 		if (xCheck && yCheck) {
 			regButtons[i].buttonPressed = 1;
 		}
 	}
+		/*
+		var xPos = (this.x / nativeX) * windowWidth;
+		var yPos = (this.y / nativeY) * windowHeight;
+		var xScale = (windowWidth / nativeX) * this.myImage.width;
+		var yScale = (windowHeight / nativeY) * this.myImage.height;
+		*/
 	
 	// Sample Board Buttons
 	for (var i=0;i<sampleNum;i++) {
+		var xPos = (sampleButtons[i].x / nativeX) * windowWidth;
+		var yPos = (sampleButtons[i].y / nativeY) * windowHeight;
 		var xScale = (windowWidth / nativeX) * sampleButtons[i].myImage.width;
 		var yScale = (windowHeight / nativeY) * sampleButtons[i].myImage.height;
-		var xPos = (windowWidth / nativeX) * sampleButtons[i].x;
-		var yPos = (windowHeight / nativeY) * sampleButtons[i].y;
-		var xCheck = (xPos < mouseX) && (sampleButtons[i].x + xScale > mouseX);
-		var yCheck = (yPos < mouseY) && (sampleButtons[i].y + yScale > mouseY);
+		var xCheck = (xPos < mouseX) && ((xPos + xScale) > mouseX);
+		var yCheck = (yPos < mouseY) && ((yPos + yScale) > mouseY);
 		if (xCheck && yCheck) {
 			sampleButtons[i].buttonPressed = 1;
 		}
