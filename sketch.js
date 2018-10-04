@@ -5,11 +5,20 @@ See README for details
 function preload() { // Preload graphical assets
 	img_board_on = loadImage('images/boardIn.png');
 	img_board_off = loadImage('images/boardOut.png');
-	img_board_press = loadImage('images/boardOut.png');
+	img_board_press = loadImage('images/boardPress.png');
 	img_board_on_act = loadImage('images/boardInA.png');
 	img_board_off_act = loadImage('images/boardOutA.png');
-	img_board_press_act = loadImage('images/boardOutA.png');
+	img_board_press_act = loadImage('images/boardPressA.png');
+	img_board_on_mod = loadImage('images/boardInM.png');
+	img_board_off_mod = loadImage('images/boardOutM.png');
+	img_board_press_mod = loadImage('images/boardPressM.png');
+	img_board_on_twk = loadImage('images/boardInT.png');
+	img_board_off_twk = loadImage('images/boardOutT.png');
+	img_board_press_twk = loadImage('images/boardPressT.png');
+	
 	img_cursor = loadImage('images/cursor.png');
+	img_tog_1 = loadImage('images/toggleA.png');
+	img_tog_2 = loadImage('images/toggleB.png');
 	img_mic_on = loadImage('images/micOn.png');
 	img_mic_off = loadImage('images/micOff.png');
 	img_mic_press = loadImage('images/micPress.png');
@@ -111,6 +120,7 @@ function setup() { // Initialization of Canvas Properties
 	cursor = -1; // Cursor position (for timeline playback)
 	cursorSpeed = 0.125 * fr; // Frames until next beat
 	cursorCounter = cursorSpeed; // Countdown to next cursor position
+	toggleMode = 0; // 0 = Board Select | 1 = Mod Select
 	
 	// Selector & Slider
 	modeButton = createButton('Audio-Visual');
@@ -187,11 +197,7 @@ function sliderEvent() { // Triggered on slider manipulation
 		break;
 		case 'Playback':
 			cursorSpeed = value * fr;
-		case 'Dry-Wet':
 		break;
-		case 'Reverb':
-		break;
-		
 	}
 }
 
@@ -209,13 +215,7 @@ function selectorEvent() { // Triggered on selector manipulation
 			slider.value(cursorSpeed * 100 / fr);
 			slider.step = 12.5;
 		break;
-		case 'Dry-Wet':
-		break;
-		case 'Reverb':
-		break;
-		
 	}
-	// STUB: Modify slider values / target
 }
 
 function Button(xOrigin,yOrigin) { // Standard Button Object
@@ -226,6 +226,11 @@ function Button(xOrigin,yOrigin) { // Standard Button Object
 	this.myImage = img_board_off;
 	this.mode = 0; // Type of Button
 	this.active = 0; // Whether the button is active (board)
+	this.tweak = 0; // Whether the button has been tweaked 
+	this.modified = 0; // Whether the button has been selected for modification
+	this.volume = 0; 
+	this.pitch = 0;
+	this.playback = 0;
 	
 	// Updates button image
 	this.update = function() {
@@ -328,11 +333,7 @@ function draw() { // Occurs each frame
 		}
 	}
 	//////+ BUTTONS +////// 
-	{	
-		// STUB: need to display recording time
-		// STUB: when implementing sequencer playback, need to be careful
-			//	to avoid interference
-	
+	{		
 		////// Recording Button //////
 		{
 			// Ignore button if press occurs during invalid time
