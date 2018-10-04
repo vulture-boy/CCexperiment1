@@ -67,16 +67,8 @@ function setup() { // Initialization of Canvas Properties
 	recTime = 0; // Counter for recording time
 	recTimeMax = 5 * fr; // Recording Time Limit (10 * fr = 10s)
 	
-	////// Initialize Button objects //////
+	////// Button Objects //////
 	regButtons = [];
-	
-	// Logo (dummy button)
-	logoX = 1920/3;
-	logoY = 86;
-	logoButton = new Button(logoX,logoY);
-	logoButton.myImage = img_logo;
-	logoButton.mode = 5;
-	regButtons.push(logoButton);
 	
 	// Mic Button
 	micX = 54;
@@ -101,7 +93,7 @@ function setup() { // Initialization of Canvas Properties
 	regButtons.push(playButton);
 	
 	// Sample Board Buttons
-	sampleButtons = [];
+	sampleButtons = []; // INDEPENDENT of regular buttons
 	sampleX = 54; // Top Left of Sample Board
 	sampleY = 468;
 	sampleOffsetX = img_board_on.width + 40; // Spacing between buttons
@@ -117,10 +109,26 @@ function setup() { // Initialization of Canvas Properties
 		sampleButtons.push(aButton);
 	}
 	
+	// Toggle Button
+	togX = 1340;
+	togY = 230;
+	togButton = new Button(togX,togY);
+	togButton.mode = 4;
+	regButtons.push(togButton);
+	
+	// Logo (dummy button)
+	logoX = 1920/3;
+	logoY = 86;
+	logoButton = new Button(logoX,logoY);
+	logoButton.myImage = img_logo;
+	logoButton.mode = 5;
+	regButtons.push(logoButton);
+	
 	cursor = -1; // Cursor position (for timeline playback)
 	cursorSpeed = 0.125 * fr; // Frames until next beat
 	cursorCounter = cursorSpeed; // Countdown to next cursor position
 	toggleMode = 0; // 0 = Board Select | 1 = Mod Select
+	modTarget = 0; // Button targeted for modification
 	
 	// Selector & Slider
 	modeButton = createButton('Audio-Visual');
@@ -218,6 +226,19 @@ function selectorEvent() { // Triggered on selector manipulation
 	}
 }
 
+function modifySelect(newValue) { // Changes selected modification
+	sampleButtons[modTarget].modify = 0;
+	modTarget = newValue;
+	sampleButtons[modTarget].modify = 1;
+}
+
+function modifyInit() { // Prepares selected target for tweaking
+	sampleButtons[modTarget].tweak = 1;
+	sampleButtons[modTarget].volume = masterVolume(value);
+	sampleButtons[modTarget].pitch = recSound.rate(value * rateRange);
+	sampleButtons[modTarget].playback = cursorSpeed = value * fr;
+}
+
 function Button(xOrigin,yOrigin) { // Standard Button Object
 	this.x = xOrigin; // Top Left of Button
 	this.y = yOrigin;
@@ -227,7 +248,7 @@ function Button(xOrigin,yOrigin) { // Standard Button Object
 	this.mode = 0; // Type of Button
 	this.active = 0; // Whether the button is active (board)
 	this.tweak = 0; // Whether the button has been tweaked 
-	this.modified = 0; // Whether the button has been selected for modification
+	this.modify = 0; // Whether the button has been selected for modification
 	this.volume = 0; 
 	this.pitch = 0;
 	this.playback = 0;
@@ -276,16 +297,33 @@ function Button(xOrigin,yOrigin) { // Standard Button Object
 				
 					if (this.buttonState == 0) { // Off State
 						if (this.active) {this.myImage = img_board_off_act;} // Check active state
+						else if (this.modify) {this.myImage = img_board_off_mod;}
+						else if (this.tweak) {this.myImage = img_board_off_twk;}
 						else {this.myImage = img_board_off;}
 						
 					} else if (this.buttonState == 1) { // On State
 						if (this.active) {this.myImage = img_board_on_act;} // Check active state
+						else if (this.modify) {this.myImage = img_board_on_mod;}
+						else if (this.tweak) {this.myImage = img_board_on_twk;}
 						else {this.myImage = img_board_on;}
 					}
 				} else { // Button Pressed
 					if (this.active) {this.myImage = img_board_press_act;} // Check active state
+					else if (this.modify) {this.myImage = img_board_press_mod;}
+					else if (this.tweak) {this.myImage = img_board_press_twk;}
 					else {this.myImage = img_board_press;}
 				}
+			break;
+			
+			case 4: // Toggle Switch
+				if (this.buttonState == 0) {
+					this.myImage = img_tog_1; // Board Selector
+				} else {
+					this.myImage = img_tog_2; // Modifier Selector
+				}
+			break;
+			
+			case 5: // Logo (RESERVED)
 			break;
 			
 			default:
@@ -383,7 +421,6 @@ function draw() { // Occurs each frame
 		}
 		////// "Play Board" Button //////
 		{
-			
 			// Ignore button if press occurs during invalid time
 			if (playButton.buttonPressed && (playSButton.buttonState != 0 || micButton.buttonState != 0 || !recStored)) {
 				playButton.buttonPressed = 0;
@@ -405,14 +442,33 @@ function draw() { // Occurs each frame
 				playButton.buttonPressed = 0;
 			}
 		}
+		////// Toggle Button //////
+		{
+			// Flip
+			if (togButton.buttonPressed) {
+				if (togButton.buttonState == 0) {
+					togButton.buttonState = 1;
+					// Activate modification targeting
+					toggleMode = 1;
+					sampleButtons[modTarget].modify = 1;
+				} else {
+					togButton.buttonState = 0;
+					// Clear modification targeting
+					toggleMode = 0;
+					sampleButtons[modTarget].modify = 0;
+				}
+				togButton.buttonPressed = 0;
+			}
+		}
 		////// Sample Board Buttons //////
-		
+		{
 		for (var i=0;i<sampleNum;i++) {
 			if (sampleButtons[i].buttonPressed) {
 				if (sampleButtons[i].buttonState == 0) {sampleButtons[i].buttonState = 1;}
 				else {sampleButtons[i].buttonState = 0;}
 				sampleButtons[i].buttonPressed = 0;
 			}
+		}
 		}
 	}
 	
@@ -455,12 +511,6 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 			regButtons[i].buttonPressed = 1;
 		}
 	}
-		/*
-		var xPos = (this.x / nativeX) * windowWidth;
-		var yPos = (this.y / nativeY) * windowHeight;
-		var xScale = (windowWidth / nativeX) * this.myImage.width;
-		var yScale = (windowHeight / nativeY) * this.myImage.height;
-		*/
 	
 	// Sample Board Buttons
 	for (var i=0;i<sampleNum;i++) {
@@ -471,7 +521,11 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 		var xCheck = (xPos < mouseX) && ((xPos + xScale) > mouseX);
 		var yCheck = (yPos < mouseY) && ((yPos + yScale) > mouseY);
 		if (xCheck && yCheck) {
-			sampleButtons[i].buttonPressed = 1;
+			if (toggleMode == 0) { // Board Mode
+				sampleButtons[i].buttonPressed = 1;
+			} else if (toggleMode == 1) { // Modifier Mode
+				modifySelect(i);
+			}
 		}
 	}
 	
