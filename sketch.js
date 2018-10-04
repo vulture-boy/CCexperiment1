@@ -128,7 +128,6 @@ function setup() { // Initialization of Canvas Properties
 	
 	slider = createSlider(0,100,0,1);
 	slider.changed(sliderEvent);
-	selector.style('border-radius', '2vh');
 	selectorEvent(); // Prepare slider init value based on selector
 	
 	selectorUpdate(); // Update positions of selector / slider
@@ -161,10 +160,16 @@ function selectorUpdate() {
 	slideY = windowHeight/3.5;
 	selector.style('width', selWidth);
 	selector.style('height', selHeight);
+	selector.style('border-radius', '2vw');
+	selector.style('fontSize', '4vh');
 	slider.style('width', slideWidth);
 	slider.style('height', selHeight);
+	slider.style('border', '5vw');
+	slider.style('border-radius', '5vw');
 	modeButton.style('width', selWidth);
 	modeButton.style('height', selHeight);
+	modeButton.style('border-radius', '2vw');
+	modeButton.style('fontSize', '3vh');
 	selector.position(selX,selY);
 	slider.position(selX,slideY);
 	modeButton.position(butX,selY);
@@ -469,7 +474,7 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 		}
 	}
 	
-	return false;
+	//return false;
 }
 
 function mousePressed() {
