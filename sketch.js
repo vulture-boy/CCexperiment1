@@ -196,15 +196,31 @@ function selectorUpdate() {
 function sliderEvent() { // Triggered on slider manipulation
 	var value = (slider.value() / 100);
 	var item = selector.value();
+	// Initialize tweak if applicable
+	if (toggleMode == 1 && sampleButtons[modTarget].tweak == 0) {
+		modifyInit();
+	}
 	switch (item) {
 		case 'Volume':
-			masterVolume(value);
+			if (toggleMode == 0) {
+				masterVolume(value);
+			} else if (toggleMode == 1) {
+				sampleButtons[modTarget].volume = value;
+			}
 		break;
 		case 'Pitch':
-			recSound.rate(value * rateRange);
+			if (toggleMode == 0) {
+				recSound.rate(value * rateRange);
+			} else if (toggleMode == 1) {
+				sampleButtons[modTarget].pitch = value * rateRange;
+			}
 		break;
 		case 'Playback':
-			cursorSpeed = value * fr;
+			if (toggleMode == 0) {
+				cursorSpeed = value * fr;
+			} else if (toggleMode == 1) {
+				sampleButtons[modTarget].playback = value * fr;
+			}
 		break;
 	}
 }
@@ -212,15 +228,27 @@ function sliderEvent() { // Triggered on slider manipulation
 function selectorEvent() { // Triggered on selector manipulation
 	var item = selector.value();
 	slider.step = 1;
-	switch (item) { // Set to current value
+	switch (item) { // Set to current value (or tweaked value)
 		case 'Volume':
-			slider.value(masterVolume() * 100);
+			if (toggleMode == 1 && sampleButtons[modTarget].tweak == 1 && sampleButtons[modTarget].volume != -1) {
+				slider.value(sampleButtons[modTarget].volume * 100);
+			} else {
+				slider.value(masterVolume() * 100);
+			}
 		break;
 		case 'Pitch':
-			slider.value(recSound.rate() * 100 / rateRange); 
+			if (toggleMode == 1 && sampleButtons[modTarget].tweak == 1 && sampleButtons[modTarget].pitch != -1) {
+				slider.value(sampleButtons[modTarget].pitch * 100 / rateRange);
+			} else {
+				slider.value(recSound.rate() * 100 / rateRange); 
+			}
 		break;
 		case 'Playback':
-			slider.value(cursorSpeed * 100 / fr);
+			if (toggleMode == 1 && sampleButtons[modTarget].tweak == 1 && sampleButtons[modTarget].playback != -1) {
+				slider.value(sampleButtons[modTarget].playback * 100 / fr);
+			} else {
+				slider.value(cursorSpeed * 100 / fr);
+			}
 			slider.step = 12.5;
 		break;
 	}
@@ -234,9 +262,6 @@ function modifySelect(newValue) { // Changes selected modification
 
 function modifyInit() { // Prepares selected target for tweaking
 	sampleButtons[modTarget].tweak = 1;
-	sampleButtons[modTarget].volume = masterVolume(value);
-	sampleButtons[modTarget].pitch = recSound.rate(value * rateRange);
-	sampleButtons[modTarget].playback = cursorSpeed = value * fr;
 }
 
 function Button(xOrigin,yOrigin) { // Standard Button Object
@@ -249,9 +274,9 @@ function Button(xOrigin,yOrigin) { // Standard Button Object
 	this.active = 0; // Whether the button is active (board)
 	this.tweak = 0; // Whether the button has been tweaked 
 	this.modify = 0; // Whether the button has been selected for modification
-	this.volume = 0; 
-	this.pitch = 0;
-	this.playback = 0;
+	this.volume = -1; 
+	this.pitch = -1;
+	this.playback = -1;
 	
 	// Updates button image
 	this.update = function() {
@@ -479,16 +504,34 @@ function draw() { // Occurs each frame
 			cursorCounter -= 1;
 			if (cursorCounter <=0) { // Counter has expired
 				sampleButtons[cursor].active = 0;
-				cursor++;
-				cursorCounter = cursorSpeed;
-				if (cursor >= sampleNum) { // Loop cursor position
-					cursor = 0;
-				}
-				sampleButtons[cursor].active = 1;
 				
 				// Play Sound 
 				if (sampleButtons[cursor].buttonState == 1) {
-					recSound.play();
+					var curVol = getMasterVolume(); // Save Master Values
+					var curRate = recSound.rate();
+					if (sampleButtons[cursor].volume != -1) { // Apply Custom Values
+						masterVolume(sampleButtons[cursor].volume);
+					}
+					if (sampleButtons[cursor].pitch != -1) {
+						recSound.rate(sampleButtons[cursor].pitch);
+					}
+					
+					recSound.play(); // Play & Reset Values
+					masterVolume(curVol);
+					recSound.rate(curRate);
+					
+				}
+				
+				cursor++;
+				if (cursor >= sampleNum) { // Loop cursor position
+					cursor = 0;
+				}
+				sampleButtons[cursor].active = 1; // New Active button
+				
+				if (sampleButtons[cursor].playback != -1) { // Check for playback tweak
+					cursorCounter = sampleButtons[cursor].playback; // Custom playback speed
+				} else {
+					cursorCounter = cursorSpeed;
 				}
 			}
 			
