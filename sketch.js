@@ -130,6 +130,9 @@ function setup() { // Initialization of Canvas Properties
 	toggleMode = 0; // 0 = Board Select | 1 = Mod Select
 	modTarget = 0; // Button targeted for modification
 	
+	masterVol = 1;
+	masterRate = 1;
+	
 	// Selector & Slider
 	modeButton = createButton('Audio-Visual');
 	modeButton.mousePressed(modeChange);
@@ -204,14 +207,16 @@ function sliderEvent() { // Triggered on slider manipulation
 	switch (item) {
 		case 'Volume':
 			if (toggleMode == 0) {
-				masterVolume(value);
+				masterVol = value;
+				masterVolume(masterVol);
 			} else if (toggleMode == 1) {
 				sampleButtons[modTarget].volume = value;
 			}
 		break;
 		case 'Pitch':
 			if (toggleMode == 0) {
-				recSound.rate(value * rateRange);
+				masterRate = value * rateRange;
+				recSound.rate(masterRate);
 			} else if (toggleMode == 1) {
 				sampleButtons[modTarget].pitch = value * rateRange;
 			}
@@ -431,20 +436,12 @@ function draw() { // Occurs each frame
 			if (playSButton.buttonState === 0 && playSButton.buttonPressed) {
 				// Play 
 				
-				var curVol = getMasterVolume(); // Save Master Values
-				var curRate = recSound.rate();
-				if (toggleMode == 1) {
-					if (sampleButtons[modTarget].volume != -1) { // Apply Custom Values
-						masterVolume(sampleButtons[modTarget].volume);
-					}
-					if (sampleButtons[modTarget].pitch != -1) {
-						recSound.rate(sampleButtons[modTarget].pitch);
-					}
-				} 
-				recSound.play(); // Play & Reset Values
-				masterVolume(curVol);
-				recSound.rate(curRate);
-				
+				if (toggleMode == 1) { // Play board value
+					playBoard(modTarget);
+				} else if (toggleMode == 0) {
+					recSound.play();
+				}
+			
 				playSButton.buttonState = 1;
 				playSButton.buttonPressed = 0;
 				
@@ -515,31 +512,21 @@ function draw() { // Occurs each frame
 		// Sample Board Cursor Counter
 		if (cursor >= 0) {
 			cursorCounter -= 1;
+			
 			if (cursorCounter <=0) { // Counter has expired
 				sampleButtons[cursor].active = 0;
-				
-				// Play Sound 
-				if (sampleButtons[cursor].buttonState == 1) {
-					var curVol = getMasterVolume(); // Save Master Values
-					var curRate = recSound.rate();
-					if (sampleButtons[cursor].volume != -1) { // Apply Custom Values
-						masterVolume(sampleButtons[cursor].volume);
-					}
-					if (sampleButtons[cursor].pitch != -1) {
-						recSound.rate(sampleButtons[cursor].pitch);
-					}
-					
-					recSound.play(); // Play & Reset Values
-					masterVolume(curVol);
-					recSound.rate(curRate);
-					
-				}
-				
 				cursor ++;
 				if (cursor >= sampleNum) { // Loop cursor position
 					cursor = 0;
 				}
 				sampleButtons[cursor].active = 1; // New Active button
+				
+				print("Cursor: " + nf(cursor));
+				print("Cursor: " + nf(sampleButtons[cursor].pitch));
+				// Play Sound 
+				if (sampleButtons[cursor].buttonState == 1) {
+					playBoard(cursor);
+				}
 				
 				if (sampleButtons[cursor].playback != -1) { // Check for playback tweak
 					cursorCounter = sampleButtons[cursor].playback; // Custom playback speed
@@ -551,6 +538,21 @@ function draw() { // Occurs each frame
 		}
 		
 	}
+}
+
+function playBoard(button) { // Plays the sound associated with this board button
+
+	if (sampleButtons[button].volume != -1) { // Apply Custom Values
+		masterVolume(sampleButtons[button].volume);
+	}
+	if (sampleButtons[button].pitch != -1) {
+		recSound.rate(sampleButtons[button].pitch);
+	}
+	
+	recSound.play();
+	
+	masterVolume(masterVol);
+	recSound.rate(masterRate);
 }
 
 function touchStarted() { // Triggered when mouse button is pressed / touch
