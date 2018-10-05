@@ -197,8 +197,9 @@ function sliderEvent() { // Triggered on slider manipulation
 	var value = (slider.value() / 100);
 	var item = selector.value();
 	// Initialize tweak if applicable
+	print(modTarget);
 	if (toggleMode == 1 && sampleButtons[modTarget].tweak == 0) {
-		modifyInit();
+		sampleButtons[modTarget].tweak = 1;
 	}
 	switch (item) {
 		case 'Volume':
@@ -258,10 +259,6 @@ function modifySelect(newValue) { // Changes selected modification
 	sampleButtons[modTarget].modify = 0;
 	modTarget = newValue;
 	sampleButtons[modTarget].modify = 1;
-}
-
-function modifyInit() { // Prepares selected target for tweaking
-	sampleButtons[modTarget].tweak = 1;
 }
 
 function Button(xOrigin,yOrigin) { // Standard Button Object
@@ -433,7 +430,21 @@ function draw() { // Occurs each frame
 			// Start Playback of Sample 
 			if (playSButton.buttonState === 0 && playSButton.buttonPressed) {
 				// Play 
-				recSound.play();
+				
+				var curVol = getMasterVolume(); // Save Master Values
+				var curRate = recSound.rate();
+				if (toggleMode == 1) {
+					if (sampleButtons[modTarget].volume != -1) { // Apply Custom Values
+						masterVolume(sampleButtons[modTarget].volume);
+					}
+					if (sampleButtons[modTarget].pitch != -1) {
+						recSound.rate(sampleButtons[modTarget].pitch);
+					}
+				} 
+				recSound.play(); // Play & Reset Values
+				masterVolume(curVol);
+				recSound.rate(curRate);
+				
 				playSButton.buttonState = 1;
 				playSButton.buttonPressed = 0;
 				
@@ -476,11 +487,13 @@ function draw() { // Occurs each frame
 					// Activate modification targeting
 					toggleMode = 1;
 					sampleButtons[modTarget].modify = 1;
+					selectorEvent();
 				} else {
 					togButton.buttonState = 0;
 					// Clear modification targeting
 					toggleMode = 0;
 					sampleButtons[modTarget].modify = 0;
+					selectorEvent();
 				}
 				togButton.buttonPressed = 0;
 			}
@@ -522,7 +535,7 @@ function draw() { // Occurs each frame
 					
 				}
 				
-				cursor++;
+				cursor ++;
 				if (cursor >= sampleNum) { // Loop cursor position
 					cursor = 0;
 				}
@@ -568,6 +581,8 @@ function touchStarted() { // Triggered when mouse button is pressed / touch
 				sampleButtons[i].buttonPressed = 1;
 			} else if (toggleMode == 1) { // Modifier Mode
 				modifySelect(i);
+				selectorEvent();
+				print(i);
 			}
 		}
 	}
