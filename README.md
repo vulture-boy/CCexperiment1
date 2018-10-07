@@ -1,13 +1,13 @@
 # OctoSwish Plus - A graphical audio sampler
-Sample Board by Tyson Moll
-Audiovisualization by Amreen
+Sample Board by Tyson Moll | Audiovisualization by Amreen
 
 for Creation and Computation class, Fall 2018
+
 Digital Futures Graduate Program
 
 We recommend using Chrome on Android for the best experience.
 External microphones also provide better mic quality.
-There are some compatibility issues with some iPhone devices.
+There are some compatibility issues with iPhone devices.
 
 ### How to Play:
 Access: https://vulture-boy.github.io/CCexperiment1/index.html
